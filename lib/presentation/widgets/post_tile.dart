@@ -40,16 +40,15 @@ class PostTile extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Post Image
         SizedBox(
           width: size.width,
-          height:
-              size.height * 0.4, 
+          height: size.height * 0.4,
           child: Image.asset(
             'assets/images/post.jpg',
-            fit: BoxFit.cover, 
-            filterQuality: FilterQuality.high,
+            fit: BoxFit.cover,
+            cacheWidth: size.width.toInt(), 
           ),
         ),
 
@@ -60,7 +59,8 @@ class PostTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 20,top: 10, right: 20, bottom: 5),
+                padding: const EdgeInsets.only(
+                    left: 20, top: 10, right: 20, bottom: 5),
                 child: Row(
                   children: [
                     Icon(
@@ -76,13 +76,11 @@ class PostTile extends StatelessWidget {
                     Image.asset(
                       'assets/images/send.jpg',
                       height: 28,
-                      filterQuality: FilterQuality.high,
                     ),
                     Spacer(),
                     Image.asset(
                       'assets/images/save.png',
                       height: 28,
-                      filterQuality: FilterQuality.high,
                     ),
                   ],
                 ),

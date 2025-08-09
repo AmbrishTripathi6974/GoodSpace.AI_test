@@ -10,9 +10,11 @@ class FeedScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
+          //Custom Header
           const CustomFeedSliverAppBar(),
 
-          // Example content to scroll
+          // Feed List
+
           SliverList(
             delegate: SliverChildBuilderDelegate(
               childCount: 5,
