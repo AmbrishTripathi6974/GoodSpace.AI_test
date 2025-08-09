@@ -49,7 +49,6 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
       
       // Request permission with more detailed handling
       final PermissionState ps = await PhotoManager.requestPermissionExtend();
-      print('Permission state: ${ps.name}');
       
       if (ps.isAuth || ps.hasAccess) {
         // Get asset path list with more options
@@ -59,24 +58,17 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
           onlyAll: false, // Changed to false to get more albums
         );
         
-        print('Found ${albums.length} albums');
-        
         if (albums.isEmpty) {
-          print('No albums found');
           emit(CreatePostEmpty());
           return;
         }
         
-        // Use the first album (usually "Recent" or "All Photos")
         AssetPathEntity album = albums.first;
-        print('Using album: ${album.name}');
         
         // Get asset count first
         int assetCount = await album.assetCountAsync;
-        print('Asset count in album: $assetCount');
         
         if (assetCount == 0) {
-          print('No assets in album');
           emit(CreatePostEmpty());
           return;
         }
@@ -85,8 +77,6 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
           page: currentPage,
           size: 60,
         );
-        
-        print('Fetched ${media.length} media items');
 
         // Process files
         final List<File> filePaths = [];
@@ -101,7 +91,7 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
 
         List<Widget> mediaWidgets = [];
         for (var asset in media) {
-          if (asset.type == AssetType.image) { // Only add images
+          if (asset.type == AssetType.image) {
             mediaWidgets.add(
               FutureBuilder(
                 future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
@@ -137,8 +127,6 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
           }
         }
         
-        print('Created ${mediaWidgets.length} widgets');
-        
         final selectedFile = filePaths.isNotEmpty ? filePaths[0] : null;
         
         emit(CreatePostLoaded(
@@ -151,11 +139,9 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
         currentPage++;
         
       } else {
-        print('Permission denied: ${ps.name}');
         emit(CreatePostPermissionDenied());
       }
     } catch (e) {
-      print('Error fetching media: $e');
       emit(CreatePostError('Failed to load media: ${e.toString()}'));
     }
   }

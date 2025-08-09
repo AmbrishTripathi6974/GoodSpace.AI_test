@@ -2,16 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:good_space_test/core/utils/helper_function.dart';
+import 'package:good_space_test/presentation/screens/post/add_post_caption.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../../bloc/create_post/create_post_bloc.dart';
 import '../../../bloc/create_post/create_post_event.dart';
 import '../../../bloc/create_post/create_post_state.dart';
-
-// Import your BLoC files
-// import 'create_post_bloc.dart';
-// import 'create_post_event.dart';
-// import 'create_post_state.dart';
 
 class CreatePostScreen extends StatelessWidget {
   const CreatePostScreen({super.key});
@@ -33,7 +29,8 @@ class CreatePostView extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Permission Required'),
-        content: const Text('This app needs access to your photos to continue. Please grant permission in your device settings.'),
+        content: const Text(
+            'This app needs access to your photos to continue. Please grant permission in your device settings.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -72,12 +69,26 @@ class CreatePostView extends StatelessWidget {
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Next',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
+              child: GestureDetector(
+                onTap: () {
+                  final state = context.read<CreatePostBloc>().state;
+                  if (state is CreatePostLoaded && state.filePaths.isNotEmpty) {
+                    final selectedFile = state.filePaths[state.currentIndex];
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddPostCaption(file: selectedFile),
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  'Next',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -95,7 +106,7 @@ class CreatePostView extends StatelessWidget {
             if (state is CreatePostLoading || state is CreatePostInitial) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (state is CreatePostError) {
               return Center(
                 child: Column(
@@ -124,7 +135,9 @@ class CreatePostView extends StatelessWidget {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<CreatePostBloc>().add(RetryFetchMediaEvent());
+                        context
+                            .read<CreatePostBloc>()
+                            .add(RetryFetchMediaEvent());
                       },
                       child: const Text('Retry'),
                     ),
@@ -132,8 +145,9 @@ class CreatePostView extends StatelessWidget {
                 ),
               );
             }
-            
-            if (state is CreatePostEmpty || state is CreatePostPermissionDenied) {
+
+            if (state is CreatePostEmpty ||
+                state is CreatePostPermissionDenied) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -145,9 +159,9 @@ class CreatePostView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      state is CreatePostPermissionDenied 
-                        ? 'Permission denied' 
-                        : 'No photos found',
+                      state is CreatePostPermissionDenied
+                          ? 'Permission denied'
+                          : 'No photos found',
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -155,8 +169,8 @@ class CreatePostView extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       state is CreatePostPermissionDenied
-                        ? 'Please grant permission to access your photos'
-                        : 'Make sure you have photos in your gallery',
+                          ? 'Please grant permission to access your photos'
+                          : 'Make sure you have photos in your gallery',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.grey[500],
                       ),
@@ -167,32 +181,37 @@ class CreatePostView extends StatelessWidget {
                         if (state is CreatePostPermissionDenied) {
                           PhotoManager.openSetting();
                         } else {
-                          context.read<CreatePostBloc>().add(RetryFetchMediaEvent());
+                          context
+                              .read<CreatePostBloc>()
+                              .add(RetryFetchMediaEvent());
                         }
                       },
-                      child: Text(state is CreatePostPermissionDenied ? 'Open Settings' : 'Retry'),
+                      child: Text(state is CreatePostPermissionDenied
+                          ? 'Open Settings'
+                          : 'Retry'),
                     ),
                   ],
                 ),
               );
             }
-            
+
             if (state is CreatePostLoaded) {
               return SingleChildScrollView(
                 child: Column(
                   children: [
                     // Selected media preview
-                    Container(
+                    SizedBox(
                       height: size.height * 0.4,
                       width: double.infinity,
-                      child: state.mediaList.isNotEmpty 
-                        ? state.mediaList[state.currentIndex]
-                        : Container(
-                            color: Colors.grey[300],
-                            child: const Center(
-                              child: Icon(Icons.photo, size: 64, color: Colors.grey),
+                      child: state.mediaList.isNotEmpty
+                          ? state.mediaList[state.currentIndex]
+                          : Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Icon(Icons.photo,
+                                    size: 64, color: Colors.grey),
+                              ),
                             ),
-                          ),
                     ),
                     Container(
                       width: double.infinity,
@@ -213,21 +232,24 @@ class CreatePostView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     // Media grid
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: state.mediaList.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3, // Changed to 3 for better grid layout
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
                         mainAxisSpacing: 1,
                         crossAxisSpacing: 1,
                       ),
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
-                            context.read<CreatePostBloc>().add(SelectMediaEvent(index));
+                            context
+                                .read<CreatePostBloc>()
+                                .add(SelectMediaEvent(index));
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -244,7 +266,7 @@ class CreatePostView extends StatelessWidget {
                 ),
               );
             }
-            
+
             return const SizedBox.shrink();
           },
         ),
