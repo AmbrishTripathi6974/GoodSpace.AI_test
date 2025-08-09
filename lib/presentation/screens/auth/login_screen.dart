@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:good_space_test/core/utils/helper_function.dart';
+import 'package:good_space_test/presentation/screens/feed/feed_screen.dart';
 
 import 'signup_screen.dart';
 
@@ -94,7 +95,14 @@ class LoginScreen extends StatelessWidget {
 
             // Login Button
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FeedScreen(),
+                  ),
+                );
+              },
               child: Container(
                 width: size.width * 0.95,
                 height: size.height * 0.06,
@@ -136,8 +144,7 @@ class LoginScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const SignUpScreen(), 
+                          builder: (context) => const SignUpScreen(),
                         ),
                       );
                     },
