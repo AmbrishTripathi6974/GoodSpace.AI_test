@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:good_space_test/presentation/screens/post/create_post_screen.dart';
 
 class CustomFeedSliverAppBar extends StatelessWidget {
   const CustomFeedSliverAppBar({super.key});
@@ -40,7 +41,14 @@ class CustomFeedSliverAppBar extends StatelessWidget {
                   'assets/images/send.jpg',
                   height: 22,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreatePostScreen(),
+                        ),
+                      );
+                },
               ),
             ],
           ),
