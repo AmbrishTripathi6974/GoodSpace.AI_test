@@ -4,6 +4,7 @@ import '../../bloc/post/post_bloc.dart';
 import '../../bloc/post/post_event.dart';
 import '../../core/utils/cached_image.dart';
 import '../../model/post_model.dart';
+import 'read_more_text.dart';
 
 class PostTile extends StatelessWidget {
   final PostModel post;
@@ -13,6 +14,8 @@ class PostTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
+
+    final ValueNotifier<bool> isExpandedNotifier = ValueNotifier<bool>(false);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 1),
@@ -24,6 +27,7 @@ class PostTile extends StatelessWidget {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Post Header
           Container(
@@ -84,13 +88,12 @@ class PostTile extends StatelessWidget {
                       size: 25,
                     ),
                     onPressed: () {
-                      final postBloc = context.read<PostBloc>();
-                      postBloc.add(
-                        ToggleLikeEvent(
-                          post: post,
-                          currentUserId: post.uid,
-                        ),
-                      );
+                      context.read<PostBloc>().add(
+                            ToggleLikeEvent(
+                              post: post,
+                              currentUserId: post.uid,
+                            ),
+                          );
                     },
                   ),
                   const SizedBox(width: 15),
@@ -106,7 +109,7 @@ class PostTile extends StatelessWidget {
 
           // Likes Text
           Padding(
-            padding: const EdgeInsets.only(left: 20, bottom: 10),
+            padding: const EdgeInsets.only(left: 18, bottom: 8),
             child: Align(
               alignment: Alignment.centerLeft,
               child: RichText(
@@ -129,6 +132,25 @@ class PostTile extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+
+          // Caption with ReadMoreText
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isExpandedNotifier,
+              builder: (context, isExpanded, _) {
+                return ReadMoreText(
+                  username: post.username,
+                  caption: post.caption,
+                  trimLength: 100,
+                  isExpanded: isExpanded,
+                  onTapReadMore: () {
+                    isExpandedNotifier.value = !isExpandedNotifier.value;
+                  },
+                );
+              },
             ),
           ),
         ],
