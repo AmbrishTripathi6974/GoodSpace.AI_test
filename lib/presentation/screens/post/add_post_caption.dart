@@ -32,7 +32,8 @@ class AddPostCaption extends StatelessWidget {
       future: _prepareImage(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
 
         final file = snapshot.data!;
@@ -46,7 +47,7 @@ class AddPostCaption extends StatelessWidget {
           ),
           child: Scaffold(
             appBar: AppBar(
-              title: const Text("Add New Post"),
+              title: const Text("Add New Post", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
               actions: [
                 BlocConsumer<AddPostBloc, AddPostState>(
                   listener: (context, state) {
@@ -62,7 +63,8 @@ class AddPostCaption extends StatelessWidget {
                     if (state is AddPostLoading) {
                       return const Padding(
                         padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: Center(
+                            child: CircularProgressIndicator()),
                       );
                     }
                     return TextButton(
@@ -76,7 +78,7 @@ class AddPostCaption extends StatelessWidget {
                       },
                       child: const Text(
                         "Share",
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     );
                   },
