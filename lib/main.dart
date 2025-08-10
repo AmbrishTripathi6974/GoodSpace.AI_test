@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize your services here
+    // Initialize your services
     final firestoreService = FirebaseFirestoreService();
     final storageService = FirebaseStorageService();
 
@@ -40,9 +40,18 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider<PostRepository>.value(value: postRepository),
       ],
-      child: BlocProvider<AuthBloc>(
-        create: (_) => AuthBloc(authService: AuthenticationService())
-          ..add(AuthCheckRequested()),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>(
+            create: (_) =>
+                AuthBloc(authService: AuthenticationService())..add(AuthCheckRequested()),
+          ),
+          BlocProvider<PostBloc>(
+            create: (context) => PostBloc(
+              postRepository: context.read<PostRepository>(),
+            )..add(LoadPostsEvent()),
+          ),
+        ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
@@ -54,13 +63,7 @@ class MyApp extends StatelessWidget {
           home: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is Authenticated) {
-                // Provide PostBloc when user authenticated
-                return BlocProvider<PostBloc>(
-                  create: (context) => PostBloc(
-                    postRepository: context.read<PostRepository>(),
-                  )..add(LoadPostsEvent()),
-                  child: const FeedScreen(),
-                );
+                return const FeedScreen();
               } else if (state is Unauthenticated) {
                 return LoginScreen();
               }
