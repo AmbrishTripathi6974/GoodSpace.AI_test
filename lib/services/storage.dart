@@ -1,18 +1,37 @@
 import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
 
-class StorageMethod {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+class FirebaseStorageService {
+  final FirebaseStorage _storage;
+  final FirebaseAuth _auth;
+  final _uuid = const Uuid();
 
-  Future<String> uploadImageToStorage(String name, File file) async {
-    Reference ref = _storage.ref().child(name).child(_auth.currentUser!.uid);
+  FirebaseStorageService({FirebaseStorage? storage, FirebaseAuth? auth})
+      : _storage = storage ?? FirebaseStorage.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
-    UploadTask uploadTask = ref.putFile(file);
-    TaskSnapshot snapshot = await uploadTask;
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-    return downloadUrl;
+  Future<String> uploadImage({
+    required String folder,
+    required File file,
+  }) async {
+    try {
+      final String fileId = _uuid.v4();
+      final ref = _storage
+          .ref()
+          .child(folder)
+          .child(_auth.currentUser!.uid)
+          .child(fileId);
+
+      final uploadTask = ref.putFile(file);
+      final snapshot = await uploadTask.whenComplete(() {});
+
+      return await snapshot.ref.getDownloadURL();
+    } on FirebaseException catch (e) {
+      throw Exception("Storage error: ${e.message}");
+    } catch (e) {
+      throw Exception("Unexpected error uploading image: $e");
+    }
   }
 }

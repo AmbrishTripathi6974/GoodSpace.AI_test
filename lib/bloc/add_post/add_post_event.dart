@@ -7,11 +7,11 @@ abstract class AddPostEvent extends Equatable {
 }
 
 class AddPostSubmitted extends AddPostEvent {
-  final File file;
+  final File image;
   final String caption;
 
-  AddPostSubmitted({required this.file, required this.caption});
+  AddPostSubmitted({required this.image, required this.caption});
 
   @override
-  List<Object?> get props => [file, caption];
+  List<Object?> get props => [image, caption];
 }

@@ -13,7 +13,6 @@ class AddPostSuccess extends AddPostState {}
 
 class AddPostFailure extends AddPostState {
   final String error;
-
   AddPostFailure(this.error);
 
   @override

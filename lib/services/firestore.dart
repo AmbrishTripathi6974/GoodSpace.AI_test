@@ -1,70 +1,198 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uuid/uuid.dart';
+import '../model/user_model.dart';
 
-// import '../model/user_model.dart';
+class FirebaseFirestoreService {
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-// class Firebase_Firestore {
-//   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestoreService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
-//    Future<bool> CreateUser({
-//     required String email,
-//     required String username,
-//     required String bio,
-//     required String profile,
-//   }) async {
-//     await _firebaseFirestore
-//         .collection('users')
-//         .doc(_auth.currentUser!.uid)
-//         .set({
-//       'email': email,
-//       'username': username,
-//       'bio': bio,
-//       'profile': profile,
-//       'followers': [],
-//       'following': [],
-//     });
-//     return true;
-//   }
+  /// -------------------------
+  /// Create User
+  /// -------------------------
+  Future<void> createUser({
+    required String email,
+    required String username,
+    required String bio,
+    required String profile,
+  }) async {
+    try {
+      final uid = _auth.currentUser!.uid;
+      await _firestore.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'username': username,
+        'bio': bio,
+        'profile': profile,
+        'followers': [],
+        'following': [],
+      });
+    } on FirebaseException catch (e) {
+      throw Exception("Firestore error: ${e.message}");
+    } catch (e) {
+      throw Exception("Unexpected error creating user: $e");
+    }
+  }
 
-//   Future<Usermodel> getUser({String? UID}) async {
-//     try {
-//       final user = await _firebaseFirestore
-//           .collection('users')
-//           .doc(UID ?? _auth.currentUser!.uid)
-//           .get();
-//       final snapuser = user.data()!;
-//       return Usermodel(
-//           snapuser['bio'],
-//           snapuser['email'],
-//           snapuser['followers'],
-//           snapuser['following'],
-//           snapuser['profile'],
-//           snapuser['username']);
-//     } on FirebaseException catch (e) {
-//       throw exceptions(e.message.toString());
-//     }
-//   }
+  /// -------------------------
+  /// Create Post
+  /// -------------------------
+  Future<void> createPost({
+    required String postImage,
+    required String caption,
+    required String uid,
+    required String username,
+    required String profileImage,
+    String location = '',
+  }) async {
+    try {
+      await _firestore.collection('posts').add({
+        'postImage': postImage,
+        'username': username,
+        'profileImage': profileImage,
+        'caption': caption,
+        'location': location,
+        'uid': uid,
+        'likes': [],
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw Exception("Firestore error: ${e.message}");
+    } catch (e) {
+      throw Exception("Unexpected error creating post: $e");
+    }
+  }
 
-//   Future<bool> CreatePost({
-//     required String postImage,
-//     required String caption,
-//     required String location,
-//   }) async {
-//     var uid = Uuid().v4();
-//     DateTime data = new DateTime.now();
-//     Usermodel user = await getUser();
-//     await _firebaseFirestore.collection('posts').doc(uid).set({
-//       'postImage': postImage,
-//       'username': user.username,
-//       'profileImage': user.profile,
-//       'caption': caption,
-//       'uid': _auth.currentUser!.uid,
-//       'postId': uid,
-//       'like': [],
-//       'time': data
-//     });
-//     return true;
-//   }
+  /// Create Post with auto user fetch
+  Future<void> createPostWithCurrentUser({
+    required String postImage,
+    required String caption,
+    String location = '',
+  }) async {
+    try {
+      final user = await getUser(_auth.currentUser!.uid);
+      final postId = const Uuid().v4();
+      await _firestore.collection('posts').doc(postId).set({
+        'postImage': postImage,
+        'username': user.username,
+        'profileImage': user.profile,
+        'caption': caption,
+        'location': location,
+        'uid': user.uid,
+        'postId': postId,
+        'like': [],
+        'time': DateTime.now(),
+      });
+    } catch (e) {
+      throw Exception("Error creating post: $e");
+    }
+  }
 
-// }
+  /// -------------------------
+  /// Get User
+  /// -------------------------
+  Future<UserModel> getUser(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (!doc.exists) throw Exception("User not found");
+      return UserModel.fromFirestore(doc.data(), doc.id);
+    } on FirebaseException catch (e) {
+      throw Exception("Firestore error: ${e.message}");
+    } catch (e) {
+      throw Exception("Unexpected error fetching user: $e");
+    }
+  }
+
+  /// -------------------------
+  /// Add Comment
+  /// -------------------------
+  Future<void> addComment({
+    required String comment,
+    required String type, // posts or reels
+    required String postId,
+  }) async {
+    try {
+      final user = await getUser(_auth.currentUser!.uid);
+      final commentId = const Uuid().v4();
+      await _firestore
+          .collection(type)
+          .doc(postId)
+          .collection('comments')
+          .doc(commentId)
+          .set({
+        'comment': comment,
+        'username': user.username,
+        'profileImage': user.profile,
+        'commentUid': commentId,
+      });
+    } catch (e) {
+      throw Exception("Error adding comment: $e");
+    }
+  }
+
+  /// -------------------------
+  /// Like / Unlike Post or Reel
+  /// -------------------------
+  Future<void> toggleLike({
+    required List<dynamic> likeList,
+    required String type, // posts or reels
+    required String uid,
+    required String postId,
+  }) async {
+    try {
+      if (likeList.contains(uid)) {
+        await _firestore.collection(type).doc(postId).update({
+          'like': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        await _firestore.collection(type).doc(postId).update({
+          'like': FieldValue.arrayUnion([uid])
+        });
+      }
+    } catch (e) {
+      throw Exception("Error toggling like: $e");
+    }
+  }
+
+  /// -------------------------
+  /// Follow / Unfollow User
+  /// -------------------------
+  Future<void> followUser({required String targetUid}) async {
+    try {
+      final snap = await _firestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .get();
+      final following = (snap.data()! as dynamic)['following'] as List;
+
+      if (following.contains(targetUid)) {
+        // Unfollow
+        await _firestore
+            .collection('users')
+            .doc(_auth.currentUser!.uid)
+            .update({
+          'following': FieldValue.arrayRemove([targetUid])
+        });
+        await _firestore.collection('users').doc(targetUid).update({
+          'followers': FieldValue.arrayRemove([_auth.currentUser!.uid])
+        });
+      } else {
+        // Follow
+        await _firestore
+            .collection('users')
+            .doc(_auth.currentUser!.uid)
+            .update({
+          'following': FieldValue.arrayUnion([targetUid])
+        });
+        await _firestore.collection('users').doc(targetUid).update({
+          'followers': FieldValue.arrayUnion([_auth.currentUser!.uid])
+        });
+      }
+    } catch (e) {
+      throw Exception("Error following/unfollowing user: $e");
+    }
+  }
+}

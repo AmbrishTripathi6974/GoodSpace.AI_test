@@ -1,131 +1,109 @@
+// views/add_post_caption.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:good_space_test/services/storage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../../bloc/add_post/add_post_bloc.dart';
+import '../../../bloc/add_post/add_post_event.dart';
+import '../../../bloc/add_post/add_post_state.dart';
 import '../../../core/utils/image_compressor.dart';
+import '../../../repository/post_repository.dart';
+import '../../../services/firestore.dart';
+import '../../../services/storage.dart';
 
-class AddPostCaption extends StatefulWidget {
+class AddPostCaption extends StatelessWidget {
   final AssetEntity asset;
+  final TextEditingController captionController = TextEditingController();
 
-  const AddPostCaption({super.key, required this.asset});
+  AddPostCaption({super.key, required this.asset});
 
-  @override
-  State<AddPostCaption> createState() => _AddPostCaptionState();
-}
-
-class _AddPostCaptionState extends State<AddPostCaption> {
-  final caption = TextEditingController();
-  File? file;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFile();
-  }
-
-  Future<void> _loadFile() async {
-    final f = await widget.asset.file;
-    if (f != null) {
-      final compressedFile = await ImageCompressor.compressImage(f, quality: 70);
-      if (mounted) {
-        setState(() {
-          file = compressedFile ?? f; // fallback if compression fails
-        });
-      }
+  Future<File?> _prepareImage() async {
+    final file = await asset.file;
+    if (file != null) {
+      return await ImageCompressor.compressImage(file, quality: 70) ?? file;
     }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return FutureBuilder<File?>(
+      future: _prepareImage(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
 
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Add New Post',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+        final file = snapshot.data!;
+
+        return BlocProvider(
+          create: (_) => AddPostBloc(
+            postRepository: PostRepository(
+              firestoreService: FirebaseFirestoreService(),
+              storageService: FirebaseStorageService(),
+            ),
           ),
-        ),
-        centerTitle: false,
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GestureDetector(
-                onTap: () async {
-                  if (file == null) return;
-                  String postUrl = await StorageMethod()
-                      .uploadImageToStorage('post', file!);
-
-                  print("Uploaded post URL: $postUrl");
-                },
-                child: Text(
-                  'Share',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text("Add New Post"),
+              actions: [
+                BlocConsumer<AddPostBloc, AddPostState>(
+                  listener: (context, state) {
+                    if (state is AddPostSuccess) {
+                      Navigator.pop(context);
+                    } else if (state is AddPostFailure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.error)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is AddPostLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      );
+                    }
+                    return TextButton(
+                      onPressed: () {
+                        context.read<AddPostBloc>().add(
+                              AddPostSubmitted(
+                                image: file,
+                                caption: captionController.text.trim(),
+                              ),
+                            );
+                      },
+                      child: const Text(
+                        "Share",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    );
+                  },
                 ),
+              ],
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Image.file(file, width: 65, height: 65, fit: BoxFit.cover),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: captionController,
+                      decoration: const InputDecoration(
+                        hintText: "Write a caption...",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (file != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 65,
-                        height: 65,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          image: DecorationImage(
-                            image: FileImage(file!),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          controller: caption,
-                          keyboardType: TextInputType.multiline,
-                          maxLines: null, // grows with input
-                          style: const TextStyle(fontSize: 16),
-                          decoration: const InputDecoration(
-                            hintText: "Write a caption...",
-                            hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none,
-                            isCollapsed: true, // less vertical padding
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                const Center(child: CircularProgressIndicator()),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
