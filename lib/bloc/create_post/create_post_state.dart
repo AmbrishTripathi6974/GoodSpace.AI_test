@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 abstract class CreatePostState extends Equatable {
   const CreatePostState();
@@ -13,36 +13,36 @@ class CreatePostInitial extends CreatePostState {}
 
 class CreatePostLoading extends CreatePostState {}
 
+
 class CreatePostLoaded extends CreatePostState {
   final List<Widget> mediaList;
-  final List<File> filePaths;
-  final File? selectedFile;
+  final List<AssetEntity> assetList;
   final int currentIndex;
 
   const CreatePostLoaded({
     required this.mediaList,
-    required this.filePaths,
-    this.selectedFile,
+    required this.assetList,
     required this.currentIndex,
   });
 
-  @override
-  List<Object?> get props => [mediaList, filePaths, selectedFile, currentIndex];
+  AssetEntity get selectedAsset => assetList[currentIndex];
 
   CreatePostLoaded copyWith({
     List<Widget>? mediaList,
-    List<File>? filePaths,
-    File? selectedFile,
+    List<AssetEntity>? assetList,
     int? currentIndex,
   }) {
     return CreatePostLoaded(
       mediaList: mediaList ?? this.mediaList,
-      filePaths: filePaths ?? this.filePaths,
-      selectedFile: selectedFile ?? this.selectedFile,
+      assetList: assetList ?? this.assetList,
       currentIndex: currentIndex ?? this.currentIndex,
     );
   }
+
+  @override
+  List<Object?> get props => [mediaList, assetList, currentIndex];
 }
+
 
 class CreatePostEmpty extends CreatePostState {}
 

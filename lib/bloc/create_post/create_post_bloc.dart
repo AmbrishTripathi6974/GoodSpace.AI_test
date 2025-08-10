@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -39,110 +38,79 @@ class CreatePostBloc extends Bloc<CreatePostEvent, CreatePostState> {
   ) {
     if (state is CreatePostLoaded) {
       final currentState = state as CreatePostLoaded;
-      emit(currentState.copyWith(currentIndex: event.index));
+      emit(currentState.copyWith(
+        currentIndex: event.index,
+      ));
     }
   }
 
   Future<void> _fetchNewMedia(Emitter<CreatePostState> emit) async {
     try {
       lastPage = currentPage;
-      
-      // Request permission with more detailed handling
+
       final PermissionState ps = await PhotoManager.requestPermissionExtend();
-      
+
       if (ps.isAuth || ps.hasAccess) {
-        // Get asset path list with more options
-        List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-          type: RequestType.image, // Only get images
+        final albums = await PhotoManager.getAssetPathList(
+          type: RequestType.image,
           hasAll: true,
-          onlyAll: false, // Changed to false to get more albums
         );
-        
+
         if (albums.isEmpty) {
           emit(CreatePostEmpty());
           return;
         }
-        
-        AssetPathEntity album = albums.first;
-        
-        // Get asset count first
-        int assetCount = await album.assetCountAsync;
-        
+
+        final album = albums.first;
+        final assetCount = await album.assetCountAsync;
+
         if (assetCount == 0) {
           emit(CreatePostEmpty());
           return;
         }
-        
-        List<AssetEntity> media = await album.getAssetListPaged(
+
+        final List<AssetEntity> assets = await album.getAssetListPaged(
           page: currentPage,
           size: 60,
         );
 
-        // Process files
-        final List<File> filePaths = [];
-        for (var asset in media) {
-          if (asset.type == AssetType.image) {
-            final file = await asset.file;
-            if (file != null) {
-              filePaths.add(File(file.path));
-            }
-          }
-        }
+        // Build thumbnail widgets
+        final List<Widget> mediaWidgets = assets.map((asset) {
+          return FutureBuilder(
+            future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return Container(
+                  padding: const EdgeInsets.all(2),
+                  child: Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              }
+              return Container(
+                color: Colors.grey[300],
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            },
+          );
+        }).toList();
 
-        List<Widget> mediaWidgets = [];
-        for (var asset in media) {
-          if (asset.type == AssetType.image) {
-            mediaWidgets.add(
-              FutureBuilder(
-                future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return Container(
-                        padding: const EdgeInsets.all(2),
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Image.memory(
-                                snapshot.data!,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  }
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          }
-        }
-        
-        final selectedFile = filePaths.isNotEmpty ? filePaths[0] : null;
-        
         emit(CreatePostLoaded(
           mediaList: mediaWidgets,
-          filePaths: filePaths,
-          selectedFile: selectedFile,
+          assetList: assets,
           currentIndex: 0,
         ));
-        
+
         currentPage++;
-        
       } else {
         emit(CreatePostPermissionDenied());
       }
     } catch (e) {
-      emit(CreatePostError('Failed to load media: ${e.toString()}'));
+      emit(CreatePostError('Failed to load media: $e'));
     }
   }
 }

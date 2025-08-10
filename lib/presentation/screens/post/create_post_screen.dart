@@ -72,12 +72,11 @@ class CreatePostView extends StatelessWidget {
               child: GestureDetector(
                 onTap: () {
                   final state = context.read<CreatePostBloc>().state;
-                  if (state is CreatePostLoaded && state.filePaths.isNotEmpty) {
-                    final selectedFile = state.filePaths[state.currentIndex];
+                  if (state is CreatePostLoaded) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) =>
-                            AddPostCaption(file: selectedFile),
+                            AddPostCaption(asset: state.selectedAsset),
                       ),
                     );
                   }
@@ -247,9 +246,10 @@ class CreatePostView extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
+                            final asset = state.assetList[index];
                             context
                                 .read<CreatePostBloc>()
-                                .add(SelectMediaEvent(index));
+                                .add(SelectMediaEvent(index, asset));
                           },
                           child: Container(
                             decoration: BoxDecoration(
