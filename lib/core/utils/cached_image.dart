@@ -7,6 +7,7 @@ class CachedImage extends StatelessWidget {
   final double? width;
   final BoxFit fit;
   final BorderRadius borderRadius;
+  final bool useLowResForFeed; // New
 
   const CachedImage({
     super.key,
@@ -15,6 +16,7 @@ class CachedImage extends StatelessWidget {
     this.width,
     this.fit = BoxFit.cover,
     this.borderRadius = BorderRadius.zero,
+    this.useLowResForFeed = false,
   });
 
   @override
@@ -23,19 +25,26 @@ class CachedImage extends StatelessWidget {
       return _buildPlaceholder();
     }
 
+    final displayUrl = useLowResForFeed ? _getLowResUrl(imageUrl!) : imageUrl!;
+
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
-        imageUrl: imageUrl!,
+        imageUrl: displayUrl,
         height: height,
         width: width,
         fit: fit,
+        memCacheWidth: 1080, // prevents decoding >1080px images
         fadeInDuration: const Duration(milliseconds: 300),
         placeholderFadeInDuration: const Duration(milliseconds: 200),
         placeholder: (context, url) => _buildLoading(),
         errorWidget: (context, url, error) => _buildError(),
       ),
     );
+  }
+
+  String _getLowResUrl(String originalUrl) {
+    return originalUrl;
   }
 
   Widget _buildLoading() {
