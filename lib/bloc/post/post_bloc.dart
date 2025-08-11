@@ -1,21 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:good_space_test/services/like_storage_service.dart';
 import '../../model/post_model.dart';
 import '../../repository/post_repository.dart';
 import 'post_event.dart';
 import 'post_state.dart';
 
-
 class PostBloc extends Bloc<PostEvent, PostState> {
   final PostRepository postRepository;
-  Stream<List<PostModel>>? _postStream;
 
   PostBloc({required this.postRepository}) : super(PostLoading()) {
+    // Load posts with likes (repo returns likes populated)
     on<LoadPostsEvent>((event, emit) async {
       emit(PostLoading());
       try {
-        _postStream = postRepository.getPostsStream();
+        final postStream = postRepository.getPostsStreamWithLikes();
         await emit.forEach<List<PostModel>>(
-          _postStream!,
+          postStream,
           onData: (posts) => PostLoaded(posts),
           onError: (error, _) => PostError(error.toString()),
         );
@@ -24,22 +24,40 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       }
     });
 
+    // Toggle like
     on<ToggleLikeEvent>((event, emit) async {
+      if (state is! PostLoaded) return;
+      final currentState = state as PostLoaded;
+
+      // optimistic UI update (toggle userId in likes list)
+      final updatedPosts = currentState.posts.map((post) {
+        if (post.postId == event.post.postId) {
+          final updatedLikes = List<String>.from(post.likes);
+          if (updatedLikes.contains(event.currentUserId)) {
+            updatedLikes.remove(event.currentUserId);
+          } else {
+            updatedLikes.add(event.currentUserId);
+          }
+          return post.copyWith(likes: updatedLikes);
+        }
+        return post;
+      }).toList();
+
+      emit(PostLoaded(updatedPosts));
+
       try {
-        await postRepository.toggleLike(
+        // local persistence for fast restart UX
+        await LikePersistenceService.toggleLike(event.post.postId);
+
+        // sync to Firestore subcollection using explicit userId from event
+        await postRepository.toggleLikeInSubcollection(
           postId: event.post.postId,
-          uid: event.currentUserId,
-          currentLikes: event.post.likes,
+          userId: event.currentUserId,
         );
       } catch (e) {
-        // Optional: handle error if needed
+        // rollback on failure
+        emit(currentState);
       }
     });
-  }
-
-  @override
-  Future<void> close() {
-    // Clean up if needed
-    return super.close();
   }
 }

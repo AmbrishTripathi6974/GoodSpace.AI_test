@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:good_space_test/core/utils/helper_function.dart';
-import 'package:good_space_test/presentation/screens/feed/feed_screen.dart';
 import 'package:good_space_test/presentation/screens/auth/signup_screen.dart';
 import 'package:good_space_test/bloc/auth/auth_bloc.dart';
 import 'package:good_space_test/bloc/auth/auth_event.dart';
 import 'package:good_space_test/bloc/auth/auth_state.dart';
+
+import '../home/navigation_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -13,10 +14,10 @@ class LoginScreen extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void _navigateToFeed(BuildContext context) {
+  void _navigateToNavigationsScreen(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const FeedScreen()),
+      MaterialPageRoute(builder: (_) => const NavigationsScreen()),
     );
   }
 
@@ -35,7 +36,7 @@ class LoginScreen extends StatelessWidget {
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is Authenticated) {
-              _navigateToFeed(context);
+              _navigateToNavigationsScreen(context);
             } else if (state is Unauthenticated) {
               _showError(context, "Login failed");
             }

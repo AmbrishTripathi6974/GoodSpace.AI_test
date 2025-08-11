@@ -22,7 +22,7 @@ class NavigationsScreen extends StatelessWidget {
           final navCubit = context.read<NavigationCubit>();
 
           return Scaffold(
-            extendBody: true, // Allows content to go behind the nav bar for a flush look
+            extendBody: true,
             bottomNavigationBar: BlocBuilder<NavBarVisibilityCubit, bool>(
               builder: (context, isVisible) {
                 return AnimatedSlide(
@@ -30,32 +30,20 @@ class NavigationsScreen extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
-                    backgroundColor: Colors.white, // Solid background like Instagram
-                    elevation: 0, // Flat style
+                    backgroundColor: Colors.white,
+                    elevation: 0,
                     selectedItemColor: Colors.black,
                     unselectedItemColor: Colors.grey,
                     currentIndex: currentIndex,
                     onTap: navCubit.setPage,
                     items: [
-                      const BottomNavigationBarItem(
-                        icon: Icon(Icons.home),
-                        label: '',
-                      ),
-                      const BottomNavigationBarItem(
-                        icon: Icon(Icons.search),
-                        label: '',
-                      ),
+                      const BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                      const BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
                       BottomNavigationBarItem(
-                        icon: Image.asset(
-                          'assets/images/instagram-reels-icon.png',
-                          height: 20,
-                        ),
+                        icon: Image.asset('assets/images/instagram-reels-icon.png', height: 20),
                         label: '',
                       ),
-                      const BottomNavigationBarItem(
-                        icon: Icon(Icons.person),
-                        label: '',
-                      ),
+                      const BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
                     ],
                   ),
                 );
@@ -65,10 +53,10 @@ class NavigationsScreen extends StatelessWidget {
               controller: navCubit.pageController,
               onPageChanged: navCubit.onPageChanged,
               children: [
-                const FeedScreen(),
+                FeedScreen(),
                 ExploreScreen(),
-                const CreatePostScreen(),
-                const ProfileScreen(),
+                CreatePostScreen(),
+                ProfileScreen(),
               ],
             ),
           );

@@ -1,55 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../../bloc/post/post_bloc.dart';
 import '../../bloc/post/post_event.dart';
 import '../../core/utils/cached_image.dart';
 import '../../model/post_model.dart';
 import 'comment_tile.dart';
+import 'heat_overlay_animation.dart';
 import 'read_more_text.dart';
 
-class PostTile extends StatelessWidget {
+class PostTile extends StatefulWidget {
   final PostModel post;
   const PostTile({super.key, required this.post});
+
+  @override
+  State<PostTile> createState() => _PostTileState();
+}
+
+class _PostTileState extends State<PostTile> {
+  late ValueNotifier<bool> isExpandedNotifier;
+  late ValueNotifier<bool> showHeartOverlay;
+  late String? currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    isExpandedNotifier = ValueNotifier(false);
+    showHeartOverlay = ValueNotifier(false);
+    currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  }
+
+  void _triggerLike(BuildContext context, {bool forceLike = false}) {
+    if (currentUserId == null) return;
+    final alreadyLiked = widget.post.likes.contains(currentUserId);
+
+    if (forceLike && !alreadyLiked) {
+      showHeartOverlay.value = true;
+      Future.delayed(const Duration(milliseconds: 700), () {
+        showHeartOverlay.value = false;
+      });
+    }
+
+    context.read<PostBloc>().add(
+          ToggleLikeEvent(
+            post: widget.post,
+            currentUserId: currentUserId!,
+          ),
+        );
+  }
+
+  @override
+  void dispose() {
+    isExpandedNotifier.dispose();
+    showHeartOverlay.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    final ValueNotifier<bool> isExpandedNotifier = ValueNotifier<bool>(false);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 0.5,
+    return Material(
+      color: Colors.white, // match your container color
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 1),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300, width: 0.5),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Post Header
-          Container(
-            height: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ListTile(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            ListTile(
               leading: ClipOval(
-                child: SizedBox(
-                  width: 35,
+                child: CachedImage(
+                  imageUrl: widget.post.profileImage,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(100),
+                  useLowResForFeed: true,
                   height: 35,
-                  child: CachedImage(
-                    imageUrl: post.profileImage,
-                    fit: BoxFit.cover,
-                    borderRadius: BorderRadius.circular(100),
-                    useLowResForFeed: true,
-                    height: 35,
-                    width: 35,
-                  ),
+                  width: 35,
                 ),
               ),
               title: Text(
-                post.username,
+                widget.post.username,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -57,48 +93,50 @@ class PostTile extends StatelessWidget {
               ),
               trailing: const Icon(Icons.more_horiz),
             ),
-          ),
 
-          // Post Image
-          SizedBox(
-            height: screenHeight * 0.4,
-            width: double.infinity,
-            child: CachedImage(
-              imageUrl: post.postImage,
-              fit: BoxFit.cover,
-              useLowResForFeed: true,
-              height: screenHeight * 0.4,
-              width: double.infinity,
+            // Image
+            GestureDetector(
+              onDoubleTap: () => _triggerLike(context, forceLike: true),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CachedImage(
+                    imageUrl: widget.post.postImage,
+                    fit: BoxFit.cover,
+                    useLowResForFeed: true,
+                    height: screenHeight * 0.4,
+                    width: double.infinity,
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: showHeartOverlay,
+                    builder: (_, isVisible, __) =>
+                        HeartOverlayAnimation(isVisible: isVisible),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // Action Buttons
-          Container(
-            color: theme.scaffoldBackgroundColor,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8, right: 20, top: 4),
+            // Actions
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 20),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      post.likes.contains(post.uid)
-                          ? Icons.favorite
-                          : Icons.favorite_outline_rounded,
-                      color: post.likes.contains(post.uid) ? Colors.red : null,
-                      size: 25,
-                    ),
-                    onPressed: () {
-                      context.read<PostBloc>().add(
-                            ToggleLikeEvent(
-                              post: post,
-                              currentUserId: post.uid,
-                            ),
-                          );
+                  BlocBuilder<PostBloc, dynamic>(
+                    builder: (context, state) {
+                      final liked = widget.post.likes.contains(currentUserId);
+                      return IconButton(
+                        icon: Icon(
+                          liked
+                              ? Icons.favorite
+                              : Icons.favorite_outline_rounded,
+                          color: liked ? Colors.red : null,
+                          size: 25,
+                        ),
+                        onPressed: () => _triggerLike(context),
+                      );
                     },
                   ),
                   const SizedBox(width: 15),
-
-                  // Comment Button
                   GestureDetector(
                     onTap: () {
                       showModalBottomSheet(
@@ -106,17 +144,13 @@ class PostTile extends StatelessWidget {
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (_) => CommentScreen(
-                          type: 'posts', // or 'reels'
-                          postId: post.postId,
+                          type: 'posts',
+                          postId: widget.post.postId,
                         ),
                       );
                     },
-                    child: Image.asset(
-                      'assets/images/comment.png',
-                      height: 28,
-                    ),
+                    child: Image.asset('assets/images/comment.png', height: 28),
                   ),
-
                   const SizedBox(width: 15),
                   Image.asset('assets/images/send.jpg', height: 28),
                   const Spacer(),
@@ -124,13 +158,10 @@ class PostTile extends StatelessWidget {
                 ],
               ),
             ),
-          ),
 
-          // Likes Text
-          Padding(
-            padding: const EdgeInsets.only(left: 18, bottom: 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
+            // Likes count
+            Padding(
+              padding: const EdgeInsets.only(left: 18, bottom: 8),
               child: RichText(
                 text: TextSpan(
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -140,39 +171,39 @@ class PostTile extends StatelessWidget {
                   children: [
                     const TextSpan(text: 'Liked by '),
                     TextSpan(
-                      text: post.username,
+                      text: widget.post.username,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const TextSpan(text: ' and '),
                     TextSpan(
-                      text: '${post.likes.length} others',
+                      text: '${widget.post.likes.length} others',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
 
-          // Caption with ReadMoreText
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: isExpandedNotifier,
-              builder: (context, isExpanded, _) {
-                return ReadMoreText(
-                  username: post.username,
-                  caption: post.caption,
-                  trimLength: 100,
-                  isExpanded: isExpanded,
-                  onTapReadMore: () {
-                    isExpandedNotifier.value = !isExpandedNotifier.value;
-                  },
-                );
-              },
+            // Caption
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isExpandedNotifier,
+                builder: (context, isExpanded, _) {
+                  return ReadMoreText(
+                    username: widget.post.username,
+                    caption: widget.post.caption,
+                    trimLength: 100,
+                    isExpanded: isExpanded,
+                    onTapReadMore: () {
+                      isExpandedNotifier.value = !isExpandedNotifier.value;
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

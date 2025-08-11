@@ -56,9 +56,8 @@ class FirebaseFirestoreService {
         'caption': caption,
         'location': location,
         'uid': uid,
-        'likes': [],
-        'createdAt': Timestamp.now(), // immediate client-side timestamp
-        'serverCreatedAt': FieldValue.serverTimestamp(), // optional backup
+        'createdAt': Timestamp.now(),
+        'serverCreatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       throw Exception("Unexpected error creating post: $e");
@@ -85,7 +84,7 @@ class FirebaseFirestoreService {
   /// -------------------------
   Future<void> addComment({
     required String comment,
-    required String type, // posts or reels
+    required String type,
     required String postId,
   }) async {
     try {
@@ -110,25 +109,30 @@ class FirebaseFirestoreService {
   /// -------------------------
   /// Like / Unlike Post or Reel
   /// -------------------------
-  Future<void> toggleLike({
+  Future<String> like({
     required List<dynamic> likeList,
-    required String type, // posts or reels
+    required String type,
     required String uid,
     required String postId,
   }) async {
+    String res = 'some error';
     try {
       if (likeList.contains(uid)) {
         await _firestore.collection(type).doc(postId).update({
-          'like': FieldValue.arrayRemove([uid])
+          'likes': FieldValue.arrayRemove([uid])
         });
       } else {
         await _firestore.collection(type).doc(postId).update({
-          'like': FieldValue.arrayUnion([uid])
+          'likes': FieldValue.arrayUnion([uid])
         });
       }
+      res = 'success';
+    } on FirebaseException catch (e) {
+      res = "Firestore error: ${e.message}";
     } catch (e) {
-      throw Exception("Error toggling like: $e");
+      res = e.toString();
     }
+    return res;
   }
 
   /// -------------------------

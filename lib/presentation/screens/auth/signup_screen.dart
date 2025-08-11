@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:good_space_test/presentation/screens/home/navigation_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:good_space_test/core/utils/helper_function.dart';
 import 'package:good_space_test/bloc/auth/auth_bloc.dart';
 import 'package:good_space_test/bloc/auth/auth_event.dart';
 import 'package:good_space_test/bloc/auth/auth_state.dart';
 import 'package:good_space_test/presentation/screens/auth/login_screen.dart';
-import 'package:good_space_test/presentation/screens/feed/feed_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
   SignUpScreen({super.key});
@@ -26,10 +26,11 @@ class SignUpScreen extends StatelessWidget {
     }
   }
 
-  void _navigateToFeed(BuildContext context) {
+  // IMPORTANT: Navigate to NavigationsScreen instead of FeedScreen
+  void _navigateToNavigationsScreen(BuildContext context) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const FeedScreen()),
+      MaterialPageRoute(builder: (_) => const NavigationsScreen()),
     );
   }
 
@@ -48,7 +49,7 @@ class SignUpScreen extends StatelessWidget {
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is Authenticated) {
-              _navigateToFeed(context);
+              _navigateToNavigationsScreen(context); // updated here
             } else if (state is Unauthenticated) {
               _showError(context, "Signup failed");
             }

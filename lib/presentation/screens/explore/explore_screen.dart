@@ -9,10 +9,27 @@ import '../../../core/utils/cached_image.dart';
 import '../../../repository/storage_repository.dart';
 import '../profile/profile_screen.dart';
 
-class ExploreScreen extends StatelessWidget {
-  ExploreScreen({super.key});
+class ExploreScreen extends StatefulWidget {
+  const ExploreScreen({super.key});
 
-  final TextEditingController searchController = TextEditingController();
+  @override
+  State<ExploreScreen> createState() => _ExploreScreenState();
+}
+
+class _ExploreScreenState extends State<ExploreScreen> {
+  late final TextEditingController searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,41 +69,36 @@ class ExploreScreen extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        child: Builder(
-          builder: (context) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-              child: TextField(
-                controller: searchController,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  hintStyle:
-                      TextStyle(color: Colors.grey.shade600, fontSize: 16),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                onChanged: (value) {
-                  if (value.isEmpty) {
-                    context.read<ExploreBloc>().add(LoadExplorePosts());
-                  } else {
-                    context.read<ExploreBloc>().add(SearchUsers(value));
-                  }
-                },
-              ),
-            );
-          },
+            ],
+          ),
+          child: TextField(
+            controller: searchController,
+            textAlignVertical: TextAlignVertical.center,
+            decoration: InputDecoration(
+              hintText: "Search",
+              hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+              prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            onChanged: (value) {
+              if (value.isEmpty) {
+                context.read<ExploreBloc>().add(LoadExplorePosts());
+              } else {
+                context.read<ExploreBloc>().add(SearchUsers(value));
+              }
+            },
+          ),
         ),
       ),
     );
@@ -98,6 +110,7 @@ class ExploreScreen extends StatelessWidget {
         (context, index) {
           final snap = posts[index];
           final imageUrl = snap['postImage'] ?? "";
+          if (imageUrl.isEmpty) return const SizedBox();
 
           return GestureDetector(
             onTap: () {},

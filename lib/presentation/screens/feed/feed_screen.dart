@@ -4,23 +4,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bloc/post/post_bloc.dart';
 import '../../../bloc/post/post_state.dart';
-import '../../../core/utils/post_shimmer.dart';
 import '../../widgets/custom_header.dart';
 import '../../widgets/naviagtion_visivbility_cubit.dart';
 import '../../widgets/post_tile.dart';
+import '../../../core/utils/post_shimmer.dart';
 
-class FeedScreen extends StatelessWidget {
+class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
+  @override
+  State<FeedScreen> createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     return NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
-        if (notification.metrics.axisDirection != AxisDirection.down &&
-            notification.metrics.axisDirection != AxisDirection.up) {
-          return false;
-        }
+        if (!mounted) return false;
 
+        // Get NavBarVisibilityCubit fresh from context every time
         final navBarCubit = context.read<NavBarVisibilityCubit>();
 
         if (notification.direction == ScrollDirection.reverse) {
@@ -32,10 +35,7 @@ class FeedScreen extends StatelessWidget {
       },
       child: CustomScrollView(
         slivers: [
-          // Header
           const CustomFeedSliverAppBar(),
-
-          // Feed content
           BlocBuilder<PostBloc, PostState>(
             builder: (context, state) {
               if (state is PostLoading) {
@@ -46,16 +46,15 @@ class FeedScreen extends StatelessWidget {
                   ),
                 );
               } else if (state is PostLoaded) {
-                final posts = state.posts;
-                if (posts.isEmpty) {
+                if (state.posts.isEmpty) {
                   return const SliverFillRemaining(
                     child: Center(child: Text('No posts yet')),
                   );
                 }
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => PostTile(post: posts[index]),
-                    childCount: posts.length,
+                    (context, index) => PostTile(post: state.posts[index]),
+                    childCount: state.posts.length,
                   ),
                 );
               } else if (state is PostError) {
