@@ -22,74 +22,81 @@ class CachedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl == null || imageUrl!.isEmpty) {
-      debugPrint("CachedImage: No URL provided");
+      debugPrint("CachedImage: Empty URL");
       return _buildPlaceholder();
     }
 
-    final displayUrl = useLowResForFeed ? _getLowResUrl(imageUrl!) : imageUrl!;
+    final uri = Uri.tryParse(imageUrl!);
+    if (uri == null || !uri.hasScheme) {
+      debugPrint("CachedImage: Invalid URL -> $imageUrl");
+      return _buildError();
+    }
 
-    debugPrint("CachedImage: Loading from URL -> $displayUrl");
+    final displayUrl = useLowResForFeed ? _getLowResUrl(imageUrl!) : imageUrl!;
 
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
         imageUrl: displayUrl,
-        height: height,
-        width: width,
-        fit: fit,
-        fadeInDuration: const Duration(milliseconds: 300),
-        placeholderFadeInDuration: const Duration(milliseconds: 200),
-        placeholder: (context, url) {
-          debugPrint("CachedImage: Showing placeholder for $url");
-          return _buildLoading();
-        },
-        errorWidget: (context, url, error) {
-          debugPrint("CachedImage: Error loading $url -> $error");
-          return _buildError();
-        },
-      ),
-    );
-  }
-
-  String _getLowResUrl(String originalUrl) {
-    // You could modify this if your storage supports low-res variants
-    return originalUrl;
-  }
-
-  Widget _buildLoading() {
-    return Container(
-      height: height,
-      width: width,
-      color: Colors.grey.shade200,
-      alignment: Alignment.center,
-      child: const SizedBox(
-        height: 30,
-        width: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.black54,
+        memCacheHeight: _safeCacheSize(height),
+        memCacheWidth: _safeCacheSize(width),
+        fadeInDuration: const Duration(milliseconds: 250),
+        placeholder: (_, __) => _buildLoading(),
+        errorWidget: (_, __, ___) => _buildError(),
+        imageBuilder: (context, imageProvider) => Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            image: DecorationImage(
+              image: imageProvider,
+              fit: fit,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildError() {
-    return Container(
-      height: height,
-      width: width,
-      color: Colors.grey.shade300,
-      alignment: Alignment.center,
-      child: const Icon(Icons.broken_image, color: Colors.grey),
-    );
+  int? _safeCacheSize(double? size) {
+    if (size == null || size.isNaN || size.isInfinite) return null;
+    return size.floor(); // ensures a valid int
   }
 
-  Widget _buildPlaceholder() {
-    return Container(
-      height: height,
-      width: width,
-      color: Colors.grey.shade200,
-      alignment: Alignment.center,
-      child: const Icon(Icons.image, color: Colors.grey),
-    );
+  String _getLowResUrl(String url) {
+    try {
+      if (url.contains("firebasestorage.googleapis.com")) {
+        return "$url&alt=media";
+      }
+    } catch (_) {}
+    return url;
   }
+
+  Widget _buildLoading() => Container(
+        height: height,
+        width: width,
+        color: Colors.grey.shade200,
+        alignment: Alignment.center,
+        child: const SizedBox(
+          height: 28,
+          width: 28,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+
+  Widget _buildError() => Container(
+        height: height,
+        width: width,
+        color: Colors.grey.shade300,
+        alignment: Alignment.center,
+        child: const Icon(Icons.broken_image, color: Colors.grey),
+      );
+
+  Widget _buildPlaceholder() => Container(
+        height: height,
+        width: width,
+        color: Colors.grey.shade200,
+        alignment: Alignment.center,
+        child: const Icon(Icons.image, color: Colors.grey),
+      );
 }

@@ -64,11 +64,11 @@ class NavigationsScreen extends StatelessWidget {
             body: PageView(
               controller: navCubit.pageController,
               onPageChanged: navCubit.onPageChanged,
-              children: const [
-                FeedScreen(),
+              children: [
+                const FeedScreen(),
                 ExploreScreen(),
-                CreatePostScreen(),
-                ProfileScreen(),
+                const CreatePostScreen(),
+                const ProfileScreen(),
               ],
             ),
           );

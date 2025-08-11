@@ -9,7 +9,9 @@ import '../../../bloc/profile/profile_state.dart';
 import '../../../services/firebase_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final bool fromExplore;
+
+  const ProfileScreen({super.key, this.fromExplore = false});
 
   @override
   Widget build(BuildContext context) {
@@ -36,172 +38,196 @@ class ProfileScreen extends StatelessWidget {
               child: Scaffold(
                 backgroundColor: Colors.grey.shade100,
                 body: SafeArea(
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Container(
-                          padding: const EdgeInsets.only(bottom: 5),
-                          color: Colors.white,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // --- Profile header ---
-                              Row(
+                  child: Stack(
+                    children: [
+                      CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Container(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              color: Colors.white,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // --- Profile header ---
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 13,
+                                            top: 10,
+                                            bottom: 10,
+                                            right: 6),
+                                        child: ClipOval(
+                                          child: SizedBox(
+                                            width: 80,
+                                            height: 80,
+                                            child: CachedImage(
+                                              imageUrl: user.profile,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Live post count
+                                      StreamBuilder<QuerySnapshot>(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('posts')
+                                            .where('uid', isEqualTo: user.uid)
+                                            .snapshots(),
+                                        builder: (context, snapshot) {
+                                          final postCount = snapshot.hasData
+                                              ? snapshot.data!.docs.length
+                                              : 0;
+
+                                          return Column(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const SizedBox(width: 15),
+                                                  _buildCountWidget(
+                                                      postCount, theme),
+                                                  const SizedBox(width: 70),
+                                                  _buildCountWidget(
+                                                      user.followers.length,
+                                                      theme),
+                                                  const SizedBox(width: 80),
+                                                  _buildCountWidget(
+                                                      user.following.length,
+                                                      theme),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const SizedBox(width: 40),
+                                                  _buildLabel(
+                                                      'Posts', theme),
+                                                  const SizedBox(width: 35),
+                                                  _buildLabel(
+                                                      'Followers', theme),
+                                                  const SizedBox(width: 35),
+                                                  _buildLabel(
+                                                      'Following', theme),
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
+                                  // --- Name & Bio ---
                                   Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 13,
-                                        top: 10,
-                                        bottom: 10,
-                                        right: 6),
-                                    child: ClipOval(
-                                      child: SizedBox(
-                                        width: 80,
-                                        height: 80,
-                                        child: CachedImage(
-                                          imageUrl: user.profile,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          user.username,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          user.bio,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  // --- Edit Profile ---
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15),
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                            color: Colors.grey.shade400),
+                                      ),
+                                      child: Text(
+                                        'Edit your profile',
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
                                         ),
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(height: 12),
 
-                                  // Use StreamBuilder here to get posts count live
-                                  StreamBuilder<QuerySnapshot>(
-                                    stream: FirebaseFirestore.instance
-                                        .collection('posts')
-                                        .where('uid', isEqualTo: user.uid)
-                                        .snapshots(),
-                                    builder: (context, snapshot) {
-                                      final postCount = snapshot.hasData
-                                          ? snapshot.data!.docs.length
-                                          : 0;
-
-                                      return Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const SizedBox(width: 15),
-                                              _buildCountWidget(
-                                                  postCount, theme),
-                                              const SizedBox(width: 70),
-                                              _buildCountWidget(
-                                                  user.followers.length, theme),
-                                              const SizedBox(width: 80),
-                                              _buildCountWidget(
-                                                  user.following.length, theme),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              const SizedBox(width: 40),
-                                              _buildLabel('Posts', theme),
-                                              const SizedBox(width: 35),
-                                              _buildLabel('Followers', theme),
-                                              const SizedBox(width: 35),
-                                              _buildLabel('Following', theme),
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                  // --- Tab bar ---
+                                  const SizedBox(
+                                    width: double.infinity,
+                                    height: 30,
+                                    child: TabBar(
+                                      unselectedLabelColor: Colors.grey,
+                                      labelColor: Colors.black,
+                                      indicator: UnderlineTabIndicator(
+                                        borderSide: BorderSide(
+                                          width: 3.0,
+                                          color: Colors.black,
+                                        ),
+                                        insets: EdgeInsets.symmetric(
+                                          horizontal: 60.0,
+                                        ),
+                                      ),
+                                      tabs: [
+                                        Icon(Icons.grid_on),
+                                        Icon(Icons.video_collection),
+                                        Icon(Icons.person),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
+                            ),
+                          ),
 
-                              // --- Name and Bio ---
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      user.username,
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      user.bio,
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w300,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
+                          // --- Tab views ---
+                          SliverFillRemaining(
+                            child: TabBarView(
+                              children: [
+                                _buildPostsGrid(user.uid),
+                                const Center(
+                                    child: Text("Reels Placeholder")),
+                                const Center(
+                                    child: Text("Tagged Placeholder")),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
-                              // --- Edit Profile Button ---
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  height: 30,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(5),
-                                    border:
-                                        Border.all(color: Colors.grey.shade400),
-                                  ),
-                                  child: Text(
-                                    'Edit your profile',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              // --- Tab bar ---
-                              const SizedBox(
-                                width: double.infinity,
-                                height: 30,
-                                child: TabBar(
-                                  unselectedLabelColor: Colors.grey,
-                                  labelColor: Colors.black,
-                                  indicator: UnderlineTabIndicator(
-                                    borderSide: BorderSide(
-                                      width:
-                                          3.0, // Instagram-style thicker indicator
-                                      color: Colors.black,
-                                    ),
-                                    insets: EdgeInsets.symmetric(
-                                      horizontal: 60.0,
-                                    ),
-                                  ),
-                                  tabs: [
-                                    Icon(Icons.grid_on),
-                                    Icon(Icons.video_collection),
-                                    Icon(Icons.person),
-                                  ],
-                                ),
-                              ),
-                            ],
+                      // --- Close button (only from explore) ---
+                      if (fromExplore)
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: IconButton(
+                            icon: const Icon(Icons.clear, size: 28),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                           ),
                         ),
-                      ),
-
-                      // --- Tab views ---
-                      SliverFillRemaining(
-                        child: TabBarView(
-                          children: [
-                            // Here, reuse the same posts stream for the grid
-                            _buildPostsGrid(user.uid),
-                            const Center(child: Text("Reels Placeholder")),
-                            const Center(child: Text("Tagged Placeholder")),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -257,13 +283,11 @@ class ProfileScreen extends StatelessWidget {
           }
         }
 
-        // If we still have no data and no cache
         if ((_cachedPosts == null || _cachedPosts!.isEmpty) &&
             (!snapshot.hasData || snapshot.data!.docs.isEmpty)) {
           return const Center(child: Text("No posts yet"));
         }
 
-        // Show cached posts if Firestore temporarily sends empty
         final posts = _cachedPosts ?? [];
 
         return GridView.builder(
