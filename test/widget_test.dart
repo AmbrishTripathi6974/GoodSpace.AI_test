@@ -1,30 +1,23 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:good_space_test/main.dart';
+import 'package:good_space_test/app.dart';  // Use your app.dart import here
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('App shows splash screen initially', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify SplashScreen is shown initially
+    expect(find.byType(Center), findsWidgets); // Lottie is inside Center in SplashScreen
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Optionally, check for Lottie widget presence
+    expect(find.byType(AnimatedWidget), findsWidgets); // Lottie animation is an AnimatedWidget
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Wait for 3 seconds (duration of splash)
+    await tester.pump(const Duration(seconds: 3));
+
+    // After splash finishes, the app shows either login or home
+    // But since auth state depends on Firebase and async, we test loading indicator
+
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
   });
 }
