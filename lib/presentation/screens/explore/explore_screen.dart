@@ -35,37 +35,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ExploreBloc(ExploreRepository())..add(LoadExplorePosts()),
-      child: Scaffold(
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              _searchBox(),
-              BlocBuilder<ExploreBloc, ExploreState>(
-                builder: (context, state) {
-                  if (state is ExploreLoading) {
-                    return const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (state is ExplorePostsLoaded) {
-                    return _postsGrid(state.posts);
-                  } else if (state is ExploreUsersLoaded) {
-                    return _userList(state.users);
-                  } else if (state is ExploreError) {
-                    return SliverToBoxAdapter(
-                      child: Center(child: Text(state.message)),
-                    );
-                  }
-                  return const SliverToBoxAdapter();
-                },
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  _searchBox(context),
+                  BlocBuilder<ExploreBloc, ExploreState>(
+                    builder: (context, state) {
+                      if (state is ExploreLoading) {
+                        return const SliverFillRemaining(
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else if (state is ExplorePostsLoaded) {
+                        return _postsGrid(state.posts);
+                      } else if (state is ExploreUsersLoaded) {
+                        return _userList(state.users);
+                      } else if (state is ExploreError) {
+                        return SliverToBoxAdapter(
+                          child: Center(child: Text(state.message)),
+                        );
+                      }
+                      return const SliverToBoxAdapter();
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  SliverToBoxAdapter _searchBox() {
+  SliverToBoxAdapter _searchBox(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -155,7 +159,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ProfileScreen(fromExplore: true),
+                  builder: (_) => const ProfileScreen(fromExplore: true),
                 ),
               );
             },
