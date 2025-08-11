@@ -57,37 +57,11 @@ class FirebaseFirestoreService {
         'location': location,
         'uid': uid,
         'likes': [],
-        'createdAt': FieldValue.serverTimestamp(),
+        'createdAt': Timestamp.now(), // immediate client-side timestamp
+        'serverCreatedAt': FieldValue.serverTimestamp(), // optional backup
       });
-    } on FirebaseException catch (e) {
-      throw Exception("Firestore error: ${e.message}");
     } catch (e) {
       throw Exception("Unexpected error creating post: $e");
-    }
-  }
-
-  /// Create Post with auto user fetch
-  Future<void> createPostWithCurrentUser({
-    required String postImage,
-    required String caption,
-    String location = '',
-  }) async {
-    try {
-      final user = await getUser(_auth.currentUser!.uid);
-      final postId = const Uuid().v4();
-      await _firestore.collection('posts').doc(postId).set({
-        'postImage': postImage,
-        'username': user.username,
-        'profileImage': user.profile,
-        'caption': caption,
-        'location': location,
-        'uid': user.uid,
-        'postId': postId,
-        'like': [],
-        'time': DateTime.now(),
-      });
-    } catch (e) {
-      throw Exception("Error creating post: $e");
     }
   }
 

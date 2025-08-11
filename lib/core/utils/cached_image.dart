@@ -7,7 +7,7 @@ class CachedImage extends StatelessWidget {
   final double? width;
   final BoxFit fit;
   final BorderRadius borderRadius;
-  final bool useLowResForFeed; // New
+  final bool useLowResForFeed;
 
   const CachedImage({
     super.key,
@@ -22,10 +22,13 @@ class CachedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl == null || imageUrl!.isEmpty) {
+      debugPrint("CachedImage: No URL provided");
       return _buildPlaceholder();
     }
 
     final displayUrl = useLowResForFeed ? _getLowResUrl(imageUrl!) : imageUrl!;
+
+    debugPrint("CachedImage: Loading from URL -> $displayUrl");
 
     return ClipRRect(
       borderRadius: borderRadius,
@@ -34,16 +37,22 @@ class CachedImage extends StatelessWidget {
         height: height,
         width: width,
         fit: fit,
-        memCacheWidth: 1080, // prevents decoding >1080px images
         fadeInDuration: const Duration(milliseconds: 300),
         placeholderFadeInDuration: const Duration(milliseconds: 200),
-        placeholder: (context, url) => _buildLoading(),
-        errorWidget: (context, url, error) => _buildError(),
+        placeholder: (context, url) {
+          debugPrint("CachedImage: Showing placeholder for $url");
+          return _buildLoading();
+        },
+        errorWidget: (context, url, error) {
+          debugPrint("CachedImage: Error loading $url -> $error");
+          return _buildError();
+        },
       ),
     );
   }
 
   String _getLowResUrl(String originalUrl) {
+    // You could modify this if your storage supports low-res variants
     return originalUrl;
   }
 
