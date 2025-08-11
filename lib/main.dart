@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:good_space_test/presentation/screens/home/navigation_screen.dart';
 
 import 'bloc/auth/auth_bloc.dart';
 import 'bloc/auth/auth_event.dart';
@@ -10,7 +11,6 @@ import 'bloc/post/post_event.dart';
 import 'config/theme.dart';
 import 'firebase_options.dart';
 import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/screens/feed/feed_screen.dart';
 import 'repository/post_repository.dart';
 import 'services/firebase_auth.dart';
 import 'services/firestore.dart';
@@ -27,7 +27,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize your services
     final firestoreService = FirebaseFirestoreService();
     final storageService = FirebaseStorageService();
 
@@ -43,8 +42,9 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>(
-            create: (_) =>
-                AuthBloc(authService: AuthenticationService())..add(AuthCheckRequested()),
+            create: (_) => AuthBloc(
+              authService: AuthenticationService(),
+            )..add(AuthCheckRequested()),
           ),
           BlocProvider<PostBloc>(
             create: (context) => PostBloc(
@@ -58,12 +58,12 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           routes: {
             '/login': (context) => LoginScreen(),
-            '/feed': (context) => const FeedScreen(),
+            '/feed': (context) => const NavigationsScreen(),
           },
           home: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               if (state is Authenticated) {
-                return const FeedScreen();
+                return const NavigationsScreen();
               } else if (state is Unauthenticated) {
                 return LoginScreen();
               }

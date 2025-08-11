@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:good_space_test/presentation/screens/post/create_post_screen.dart';
-import 'package:good_space_test/presentation/screens/profile/profile_screen.dart';
-
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import '../../bloc/auth/auth_bloc.dart';
-// import '../../bloc/auth/auth_event.dart';
-// import '../screens/auth/login_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/auth/auth_bloc.dart';
+import '../../bloc/auth/auth_event.dart';
+import '../screens/auth/login_screen.dart';
 
 class CustomFeedSliverAppBar extends StatelessWidget {
   const CustomFeedSliverAppBar({super.key});
@@ -34,42 +31,25 @@ class CustomFeedSliverAppBar extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: Icon(
-                  Icons.favorite_border_rounded,
-                  color: theme.appBarTheme.foregroundColor ?? Colors.black,
-                ),
-
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfileScreen(),
-                    ),
-                  );
-                },
-                // onPressed: () {
-                //   context.read<AuthBloc>().add(AuthLoggedOut());
-                //   Navigator.pushAndRemoveUntil(
-                //     context,
-                //     MaterialPageRoute(builder: (_) => LoginScreen()),
-                //     (route) => false,
-                //   );
-                // },
-              ),
+                  icon: Icon(
+                    Icons.favorite_border_rounded,
+                    color: theme.appBarTheme.foregroundColor ?? Colors.black,
+                  ),
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLoggedOut());
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => LoginScreen()),
+                      (route) => false,
+                    );
+                  }),
               const SizedBox(width: 8),
               IconButton(
                 icon: Image.asset(
                   'assets/images/send.jpg',
                   height: 22,
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreatePostScreen(),
-                    ),
-                  );
-                },
+                onPressed: () {},
               ),
             ],
           ),
