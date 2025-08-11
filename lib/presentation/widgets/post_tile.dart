@@ -4,6 +4,7 @@ import '../../bloc/post/post_bloc.dart';
 import '../../bloc/post/post_event.dart';
 import '../../core/utils/cached_image.dart';
 import '../../model/post_model.dart';
+import 'comment_tile.dart';
 import 'read_more_text.dart';
 
 class PostTile extends StatelessWidget {
@@ -14,7 +15,6 @@ class PostTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-
     final ValueNotifier<bool> isExpandedNotifier = ValueNotifier<bool>(false);
 
     return Container(
@@ -97,7 +97,26 @@ class PostTile extends StatelessWidget {
                     },
                   ),
                   const SizedBox(width: 15),
-                  Image.asset('assets/images/comment.png', height: 28),
+
+                  // Comment Button
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => CommentScreen(
+                          type: 'posts', // or 'reels'
+                          postId: post.postId,
+                        ),
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/images/comment.png',
+                      height: 28,
+                    ),
+                  ),
+
                   const SizedBox(width: 15),
                   Image.asset('assets/images/send.jpg', height: 28),
                   const Spacer(),
