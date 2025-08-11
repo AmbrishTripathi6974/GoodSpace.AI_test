@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:good_space_test/presentation/screens/home/navigation_screen.dart';
-
 import 'bloc/auth/auth_bloc.dart';
 import 'bloc/auth/auth_event.dart';
 import 'bloc/auth/auth_state.dart';
@@ -11,6 +10,8 @@ import 'bloc/post/post_event.dart';
 import 'config/theme.dart';
 import 'firebase_options.dart';
 import 'presentation/screens/auth/login_screen.dart';
+import 'presentation/screens/splash/splash_cubit.dart';
+import 'presentation/screens/splash/splash_screen.dart';
 import 'repository/post_repository.dart';
 import 'services/firebase_auth.dart';
 import 'services/firestore.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<SplashCubit>(create: (_) => SplashCubit()),
           BlocProvider<AuthBloc>(
             create: (_) => AuthBloc(
               authService: AuthenticationService(),
@@ -60,16 +62,26 @@ class MyApp extends StatelessWidget {
             '/login': (context) => LoginScreen(),
             '/feed': (context) => const NavigationsScreen(),
           },
-          home: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is Authenticated) {
-                return const NavigationsScreen();
-              } else if (state is Unauthenticated) {
-                return LoginScreen();
+          home: BlocBuilder<SplashCubit, bool>(
+            builder: (context, splashFinished) {
+              if (!splashFinished) {
+                // Show splash animation while waiting
+                return const SplashScreen();
+              } else {
+                // After splash, show auth-based UI
+                return BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is Authenticated) {
+                      return const NavigationsScreen();
+                    } else if (state is Unauthenticated) {
+                      return LoginScreen();
+                    }
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                );
               }
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
             },
           ),
         ),
