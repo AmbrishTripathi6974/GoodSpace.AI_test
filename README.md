@@ -62,16 +62,18 @@ Ensure the following are installed on your system:
    flutter pub get  
    ```  
 
-3. **Set Up Environment Variables : Firebase**:  
-   Install FlutterFire CLI globally if you haven’t yet:
+3. **Set Up Environment Variables: Firebase**:  
+
+   1. Install FlutterFire CLI globally if you haven’t yet:
    ```bash  
    dart pub global activate flutterfire_cli
    ```
 
-   Run the FlutterFire configuration command in your Flutter project directory:
+   2. Run the FlutterFire configuration command in your Flutter project directory:
    ```bash  
    flutterfire configure
    ```  
+   This command will guide you through selecting your Firebase project and platforms (**Android, iOS, web**). It will generate firebase_options.dart, which contains your Firebase config.
 
    Create a `.env` file in the root directory and add the following:
    ```env  
@@ -138,6 +140,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
