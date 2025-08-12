@@ -62,9 +62,15 @@ Ensure the following are installed on your system:
    flutter pub get  
    ```  
 
-3. **Set Up Environment Variables**:  
-    ```bash  
-   ** dart pub global activate flutterfire_cli**
+3. **Set Up Environment Variables : Firebase**:  
+   Install FlutterFire CLI globally if you haven’t yet:
+   ```bash  
+   dart pub global activate flutterfire_cli
+   ```
+
+   Run the FlutterFire configuration command in your Flutter project directory:
+   ```bash  
+   flutterfire configure
    ```  
 
    Create a `.env` file in the root directory and add the following:
@@ -132,6 +138,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
