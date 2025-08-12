@@ -63,13 +63,17 @@ Ensure the following are installed on your system:
    ```  
 
 3. **Set Up Environment Variables**:  
+    ```bash  
+   ** dart pub global activate flutterfire_cli**
+   ```  
+
    Create a `.env` file in the root directory and add the following:
    ```env  
    SUPABASE_URL=https://your-supabase-url.supabase.co  
    SUPABASE_KEY=your-anon-or-service-key  
    ```  
 
-4. **Run the App**:
+5. **Run the App**:
    ```bash  
    flutter run  
    ```  
@@ -128,6 +132,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
