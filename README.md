@@ -64,23 +64,22 @@ Ensure the following are installed on your system:
 
 3. **Set Up Environment Variables: Firebase**:  
 
-   1. Install FlutterFire CLI globally if you haven’t yet:
+   Install FlutterFire CLI globally if you haven’t yet:
    ```bash  
    dart pub global activate flutterfire_cli
    ```
 
-   2. Run the FlutterFire configuration command in your Flutter project directory:
+   Run the FlutterFire configuration command in your Flutter project directory:
    ```bash  
    flutterfire configure
    ```  
    This command will guide you through selecting your Firebase project and platforms (**Android, iOS, web**). It will generate firebase_options.dart, which contains your Firebase config.
 
-   Create a `.env` file in the root directory and add the following:
-   ```env  
-   SUPABASE_URL=https://your-supabase-url.supabase.co  
-   SUPABASE_KEY=your-anon-or-service-key  
-   ```  
-
+   Initialize Firebase in main.dart
+   ```bash
+   WidgetsFlutterBinding.ensureInitialized();
+   ```
+   
 5. **Run the App**:
    ```bash  
    flutter run  
@@ -140,6 +139,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
