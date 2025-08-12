@@ -32,11 +32,11 @@ This repository contains the complete solution for the **Codespace Test assignme
 | Aspect              | Technology           | Description                      |  
 |---------------------|----------------------|----------------------------------|  
 | **Framework**       | [Flutter](https://flutter.dev)   | Cross-platform mobile development. |  
-| **Authentication**  | [Supabase](https://supabase.io/) | User login and sign-up management. |  
+| **Authentication**  | [Firebase](https://firebase.google.com/) | User login and sign-up management & Real-Time data. |  
 | **State Management**| [Flutter BLoC](https://bloclibrary.dev/) | Simplified state handling.       |  
 | **Networking**      | [Dio](https://pub.dev/packages/dio) | Robust HTTP client.             |  
 | **Routing**         | [GoRouter](https://pub.dev/packages/go_router) | Dynamic navigation.             |  
-| **Local Storage**   | [Hive](https://pub.dev/packages/hive) | Efficient lightweight storage.   |  
+| **Local Storage**   | [Shared Preferences](https://pub.dev/packages/shared_preferences) | Efficient lightweight storage.   |  
 
 ---  
 
@@ -128,6 +128,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
