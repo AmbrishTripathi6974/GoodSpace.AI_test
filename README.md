@@ -1,12 +1,10 @@
-# 🌟 My Wonder App
+# 🌟 Codespace Test Assignment
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.4.4-blue?style=flat-square&logo=flutter&logoColor=white)  
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)  
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)  
-![Figma](https://img.shields.io/badge/Design-Figma-red?style=flat-square&logo=figma&logoColor=white)  
-![Supabase](https://img.shields.io/badge/Supabase-Authentication-brightgreen?style=flat-square&logo=supabase)
 
-**My Wonder App** is a proprietary, cross-platform mobile application developed by **Acumensa**, designed to enhance IoT device integration. 🌐 This app bridges the gap between the **My Wonder Pod** and your smartphone, delivering powerful features through **state-of-the-art Flutter technology**.
+This repository contains the complete solution for the **Codespace Test assignment**, demonstrating best practices in **Flutter development**, state management with **BLoC**, clean architecture, and professional **UI design**.
 
 ---  
 
@@ -128,3 +126,4 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
