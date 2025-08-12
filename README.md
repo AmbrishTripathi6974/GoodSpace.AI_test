@@ -8,12 +8,6 @@ This repository contains the complete solution for the **Codespace Test assignme
 
 ---  
 
-## 🎨 Design Reference
-
-Explore the meticulously crafted UI/UX on [Figma](https://www.figma.com/design/hiyr0iiTzdOCUlPDyr3XuS/%5BFor-review%5D-My-Wonder?node-id=5-2&t=4G6xKr5y4LSu9LUs-1).
-
----  
-
 ## ✨ Features
 - **User Authentication**  
   Users can create accounts, log in, and log out securely using Firebase Authentication, which supports email/password login.
@@ -134,6 +128,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
