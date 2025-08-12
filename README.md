@@ -94,11 +94,13 @@ A glimpse at the major dependencies:
 | Dependency            | Version | Purpose                                  |  
 |-----------------------|---------|------------------------------------------|  
 | `flutter_bloc`        | ^8.1.6  | State management.                        |  
-| `hydrated_bloc`       | ^9.1.5  | Persistent state management.             |  
+| `hydrated_bloc`       | ^9.1.5  | Persistent state management.             |
+| `cloud_firestore`     | ^6.0.0  | To store and retrieve data from Firebase |
 | `dio`                 | ^5.7.0  | Advanced HTTP client.                    |  
 | `go_router`           | ^14.6.1 | Simplified navigation management.        |  
-| `hive`                | ^2.2.3  | Lightweight local database.              |  
-| `supabase_flutter`    | ^1.2.0  | Authentication and backend integration.  |  
+| `shared_preferences`  | ^2.2.3  | To store simple data locally on the user’s device.|  
+| `frebase_auth`        | ^6.0.1  | Authentication and backend integration.  |  
+| `google_fonts`        | ^6.3.0  | For text fonts & font style.             |  
 
 For a complete list, check out the [`pubspec.yaml`](./pubspec.yaml).
 
@@ -139,6 +141,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
