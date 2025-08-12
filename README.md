@@ -16,7 +16,7 @@ Explore the meticulously crafted UI/UX on [Figma](https://www.figma.com/design/h
 
 ## ✨ Features
 - **User Authentication**  
-  Users can create accounts, log in, and log out securely using Firebase Authentication. Supports email/password login and social login options (e.g., Google Sign-In).
+  Users can create accounts, log in, and log out securely using Firebase Authentication, which supports email/password login.
 
 - **Data Storage with Firestore**  
   The app saves and retrieves user-related data in real time using Firebase Firestore, a cloud-hosted NoSQL database.
@@ -25,10 +25,10 @@ Explore the meticulously crafted UI/UX on [Figma](https://www.figma.com/design/h
   The UI adapts to different screen sizes, making it easy to use on phones, tablets, or desktops.
 
 - **State Management with BLoC Pattern**  
-  The app uses the BLoC (Business Logic Component) pattern to keep the app’s state organized and maintainable, ensuring smooth and predictable user experience.
+  The app uses the BLoC (Business Logic Component) pattern to keep its state organized and maintainable, ensuring a smooth and predictable user experience.
 
 - **Optimized for GitHub Codespaces**  
-  The project is fully configured to be opened, edited, and run inside GitHub Codespaces, a cloud development environment that runs in your browser.
+  The project is fully configured to be opened, edited, and run inside GitHub Codespaces, a cloud development environment that runs in your VS Code or Android Studio.
 
 
 ---  
@@ -134,5 +134,6 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
