@@ -22,121 +22,137 @@ class CommentScreen extends StatelessWidget {
         firestore: FirebaseFirestore.instance,
         auth: FirebaseAuth.instance,
       )..loadComments(type, postId),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-        child: Container(
-          color: theme.scaffoldBackgroundColor,
-          height: 400, // increased height
-          child: Stack(
-            children: [
-              Positioned(
-                top: 8,
-                left: 140,
-                child: Container(
-                  width: 100,
-                  height: 3,
-                  color: theme.colorScheme.onBackground.withOpacity(0.4),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 80),
-                child: BlocBuilder<CommentCubit, CommentState>(
-                  builder: (context, state) {
-                    if (state is CommentLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is CommentLoaded ||
-                        state is CommentSending) {
-                      final comments = state is CommentLoaded
-                          ? state.comments
-                          : (state as CommentSending).comments;
-                      return ListView.builder(
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final data = comments[index].data();
-                          return _commentItem(data, theme);
-                        },
-                      );
-                    } else if (state is CommentError) {
-                      return Center(
-                        child: Text(state.message,
-                            style: theme.textTheme.bodyLarge),
-                      );
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              ),
-              Positioned(
-                bottom: 40,
-                right: 5,
-                left: 5,
-                child: Container(
-                  height: 42,
-                  color: theme.scaffoldBackgroundColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black87,
-                              width: 0.2,
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: TextField(
-                            controller: _controller,
-                            maxLines: 4,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            decoration: const InputDecoration(
-                              hintText: 'Add a comment...',
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      BlocBuilder<CommentCubit, CommentState>(
-                        builder: (context, state) {
-                          final isSending = state is CommentSending;
-                          return GestureDetector(
-                            onTap: isSending
-                                ? null
-                                : () {
-                                    if (_controller.text.trim().isNotEmpty) {
-                                      context.read<CommentCubit>().sendComment(
-                                            type: type,
-                                            postId: postId,
-                                            comment: _controller.text.trim(),
-                                          );
-                                      _controller.clear();
-                                    }
-                                  },
-                            child: isSending
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
-                                  )
-                                : Icon(Icons.send,
-                                    color: theme.colorScheme.primary),
-                          );
-                        },
-                      ),
-                    ],
+      child: SafeArea(
+        child: AnimatedPadding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+            child: Container(
+              color: theme.scaffoldBackgroundColor,
+              height: 400,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 8,
+                    left: 140,
+                    child: Container(
+                      width: 100,
+                      height: 3,
+                      color: theme.colorScheme.onBackground.withOpacity(0.4),
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20, bottom: 80),
+                    child: BlocBuilder<CommentCubit, CommentState>(
+                      builder: (context, state) {
+                        if (state is CommentLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (state is CommentLoaded ||
+                            state is CommentSending) {
+                          final comments = state is CommentLoaded
+                              ? state.comments
+                              : (state as CommentSending).comments;
+                          return ListView.builder(
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              final data = comments[index].data();
+                              return _commentItem(data, theme);
+                            },
+                          );
+                        } else if (state is CommentError) {
+                          return Center(
+                            child: Text(state.message,
+                                style: theme.textTheme.bodyLarge),
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 40,
+                    right: 5,
+                    left: 5,
+                    child: Container(
+                      height: 42,
+                      color: theme.scaffoldBackgroundColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.black87,
+                                  width: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: TextField(
+                                controller: _controller,
+                                maxLines: 4,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                decoration: const InputDecoration(
+                                  hintText: 'Add a comment...',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          BlocBuilder<CommentCubit, CommentState>(
+                            builder: (context, state) {
+                              final isSending = state is CommentSending;
+                              return GestureDetector(
+                                onTap: isSending
+                                    ? null
+                                    : () {
+                                        if (_controller.text
+                                            .trim()
+                                            .isNotEmpty) {
+                                          context
+                                              .read<CommentCubit>()
+                                              .sendComment(
+                                                type: type,
+                                                postId: postId,
+                                                comment:
+                                                    _controller.text.trim(),
+                                              );
+                                          _controller.clear();
+                                        }
+                                      },
+                                child: isSending
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : Icon(Icons.send,
+                                        color: theme.colorScheme.primary),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../model/user_model.dart';
 import '../../../../core/utils/cached_image.dart';
+import 'responsive_profile_header.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserModel user;
@@ -9,20 +10,22 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final responsive = ProfileHeaderResponsive(context);
+
     return Container(
-      padding: const EdgeInsets.only(bottom: 5),
+      padding: EdgeInsets.only(bottom: responsive.verticalPadding),
       color: Colors.white,
       child: Column(
         children: [
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(responsive.horizontalPadding),
                 child: ClipOval(
                   child: CachedImage(
                     imageUrl: user.profile,
-                    height: 80,
-                    width: 80,
+                    height: responsive.avatarSize,
+                    width: responsive.avatarSize,
                   ),
                 ),
               ),
@@ -30,36 +33,71 @@ class ProfileHeader extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildStat(user.followers.length, "Followers", theme),
-                    _buildStat(user.following.length, "Following", theme),
+                    _buildStat(
+                      user.followers.length,
+                      "Followers",
+                      theme,
+                      responsive.statCountFontSize,
+                      responsive.statLabelFontSize,
+                    ),
+                    _buildStat(
+                      user.following.length,
+                      "Following",
+                      theme,
+                      responsive.statCountFontSize,
+                      responsive.statLabelFontSize,
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(
+                horizontal: responsive.horizontalPadding * 2),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.username,
-                      style: theme.textTheme.bodyLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(user.bio, style: theme.textTheme.bodyMedium),
+                  Text(
+                    user.username,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: responsive.fontSizeUsername,
+                    ),
+                  ),
+                  SizedBox(height: responsive.verticalPadding * 2),
+                  Text(
+                    user.bio,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: responsive.fontSizeBio,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: responsive.verticalPadding * 5),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: EdgeInsets.symmetric(
+                horizontal: responsive.horizontalPadding * 1.5),
             child: OutlinedButton(
               onPressed: () {},
-              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(35)),
-              child: const Text("Edit Profile"),
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size.fromHeight(responsive.buttonHeight),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(responsive.buttonHeight / 2),
+                ),
+              ),
+              child: Text(
+                "Edit Profile",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: responsive.fontSizeBio,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
@@ -67,12 +105,31 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildStat(int count, String label, ThemeData theme) {
+  Widget _buildStat(
+    int count,
+    String label,
+    ThemeData theme,
+    double countFontSize,
+    double labelFontSize,
+  ) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(count.toString(),
-            style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-        Text(label, style: theme.textTheme.bodySmall),
+        Text(
+          count.toString(),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: countFontSize,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: labelFontSize,
+          ),
+        ),
       ],
     );
   }
