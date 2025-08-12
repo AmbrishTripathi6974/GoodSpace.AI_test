@@ -77,7 +77,7 @@ Ensure the following are installed on your system:
 
    Initialize Firebase in main.dart
    ```bash
-   WidgetsFlutterBinding.ensureInitialized();
+   void main() async {WidgetsFlutterBinding.ensureInitialized(););
    ```
    
 5. **Run the App**:
@@ -139,6 +139,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
