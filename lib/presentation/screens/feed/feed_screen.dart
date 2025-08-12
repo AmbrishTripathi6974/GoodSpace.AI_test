@@ -19,55 +19,70 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<UserScrollNotification>(
-      onNotification: (notification) {
-        if (!mounted) return false;
-
-        // Get NavBarVisibilityCubit fresh from context every time
-        final navBarCubit = context.read<NavBarVisibilityCubit>();
-
-        if (notification.direction == ScrollDirection.reverse) {
-          navBarCubit.hide();
-        } else if (notification.direction == ScrollDirection.forward) {
-          navBarCubit.show();
+    return BlocListener<PostBloc, PostState>(
+      listener: (context, state) {
+        if (state is PostOperationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        } else if (state is PostError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
-        return true;
       },
-      child: CustomScrollView(
-        slivers: [
-          const CustomFeedSliverAppBar(),
-          BlocBuilder<PostBloc, PostState>(
-            builder: (context, state) {
-              if (state is PostLoading) {
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => const PostTileShimmer(),
-                    childCount: 5,
-                  ),
-                );
-              } else if (state is PostLoaded) {
-                if (state.posts.isEmpty) {
-                  return const SliverFillRemaining(
-                    child: Center(child: Text('No posts yet')),
+      child: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (!mounted) return false;
+
+          final navBarCubit = context.read<NavBarVisibilityCubit>();
+
+          if (notification.direction == ScrollDirection.reverse) {
+            navBarCubit.hide();
+          } else if (notification.direction == ScrollDirection.forward) {
+            navBarCubit.show();
+          }
+          return true;
+        },
+        child: CustomScrollView(
+          slivers: [
+            const CustomFeedSliverAppBar(),
+            BlocBuilder<PostBloc, PostState>(
+              builder: (context, state) {
+                if (state is PostLoading) {
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => const PostTileShimmer(),
+                      childCount: 5,
+                    ),
+                  );
+                } else if (state is PostLoaded) {
+                  if (state.posts.isEmpty) {
+                    return const SliverFillRemaining(
+                      child: Center(child: Text('No posts yet')),
+                    );
+                  }
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => PostTile(post: state.posts[index]),
+                      childCount: state.posts.length,
+                    ),
+                  );
+                } else if (state is PostError) {
+                  return SliverFillRemaining(
+                    child: Center(child: Text('Error: ${state.message}')),
                   );
                 }
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => PostTile(post: state.posts[index]),
-                    childCount: state.posts.length,
-                  ),
+                return const SliverFillRemaining(
+                  child: Center(child: Text('Something went wrong')),
                 );
-              } else if (state is PostError) {
-                return SliverFillRemaining(
-                  child: Center(child: Text('Error: ${state.message}')),
-                );
-              }
-              return const SliverFillRemaining(
-                child: Center(child: Text('Something went wrong')),
-              );
-            },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

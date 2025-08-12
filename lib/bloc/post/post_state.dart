@@ -9,6 +9,10 @@ class PostLoaded extends PostState {
 
   PostLoaded(this.posts);
 }
+class PostOperationSuccess extends PostState {
+  final String message;
+  PostOperationSuccess(this.message);
+}
 
 class PostError extends PostState {
   final String message;

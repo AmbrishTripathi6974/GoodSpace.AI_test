@@ -50,6 +50,56 @@ class _PostTileState extends State<PostTile> {
         );
   }
 
+  Future<void> _onMoreIconTapDown(TapDownDetails details) async {
+    // Only show delete option if current user is the owner
+    if (currentUserId == null || currentUserId != widget.post.uid) return;
+
+    final dx = details.globalPosition.dx;
+    final dy = details.globalPosition.dy;
+    final size = MediaQuery.of(context).size;
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(dx, dy, size.width - dx, size.height - dy),
+      items: [
+        PopupMenuItem<String>(
+          value: 'delete',
+          child: Row(
+            children: const [
+              Icon(Icons.delete, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (selected == 'delete') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Post?'),
+          content: const Text('Are you sure you want to delete this post?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            TextButton(
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        context.read<PostBloc>().add(DeletePostEvent(postId: widget.post.postId));
+      }
+    }
+  }
+
   @override
   void dispose() {
     isExpandedNotifier.dispose();
@@ -63,7 +113,7 @@ class _PostTileState extends State<PostTile> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Material(
-      color: Colors.white, // match your container color
+      color: Colors.white,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 1),
         decoration: BoxDecoration(
@@ -91,7 +141,10 @@ class _PostTileState extends State<PostTile> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing: const Icon(Icons.more_horiz),
+              trailing: GestureDetector(
+                onTapDown: _onMoreIconTapDown,
+                child: const Icon(Icons.more_horiz),
+              ),
             ),
 
             // Image

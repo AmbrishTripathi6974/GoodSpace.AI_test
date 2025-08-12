@@ -5,13 +5,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/comment/comment_cubit.dart';
 import '../../bloc/comment/comment_state.dart';
 import '../../core/utils/cached_image.dart';
+import 'read_more_text.dart';
 
-class CommentScreen extends StatelessWidget {
+class CommentScreen extends StatefulWidget {
   final String type;
   final String postId;
-  final TextEditingController _controller = TextEditingController();
 
   CommentScreen({super.key, required this.type, required this.postId});
+
+  @override
+  State<CommentScreen> createState() => _CommentScreenState();
+}
+
+class _CommentScreenState extends State<CommentScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  /// Track expanded state per comment by comment ID or index
+  final Set<int> _expandedIndexes = {};
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +31,7 @@ class CommentScreen extends StatelessWidget {
       create: (_) => CommentCubit(
         firestore: FirebaseFirestore.instance,
         auth: FirebaseAuth.instance,
-      )..loadComments(type, postId),
+      )..loadComments(widget.type, widget.postId),
       child: SafeArea(
         child: AnimatedPadding(
           padding: EdgeInsets.only(
@@ -36,7 +46,7 @@ class CommentScreen extends StatelessWidget {
             ),
             child: Container(
               color: theme.scaffoldBackgroundColor,
-              height: 400,
+              height: 450,
               child: Stack(
                 children: [
                   Positioned(
@@ -64,7 +74,13 @@ class CommentScreen extends StatelessWidget {
                             itemCount: comments.length,
                             itemBuilder: (context, index) {
                               final data = comments[index].data();
-                              return _commentItem(data, theme);
+
+                              // Check if this comment is expanded
+                              final isExpanded =
+                                  _expandedIndexes.contains(index);
+
+                              return _commentItem(
+                                  data, theme, index, isExpanded);
                             },
                           );
                         } else if (state is CommentError) {
@@ -126,8 +142,8 @@ class CommentScreen extends StatelessWidget {
                                           context
                                               .read<CommentCubit>()
                                               .sendComment(
-                                                type: type,
-                                                postId: postId,
+                                                type: widget.type,
+                                                postId: widget.postId,
                                                 comment:
                                                     _controller.text.trim(),
                                               );
@@ -159,27 +175,54 @@ class CommentScreen extends StatelessWidget {
     );
   }
 
-  Widget _commentItem(Map<String, dynamic> data, ThemeData theme) {
-    return ListTile(
-      leading: ClipOval(
-        child: SizedBox(
-          height: 35,
-          width: 35,
-          child: CachedImage(imageUrl: data['profileImage']),
-        ),
-      ),
-      title: Text(
-        data['username'],
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-      subtitle: Text(
-        data['comment'],
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: 14,
-        ),
+  Widget _commentItem(
+      Map<String, dynamic> data, ThemeData theme, int index, bool isExpanded) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipOval(
+                child: SizedBox(
+                  height: 32,
+                  width: 32,
+                  child: CachedImage(imageUrl: data['profileImage']),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                data['username'],
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(
+                left:
+                    45), // align comment start with username text, leaving profile space
+            child: ReadMoreText(
+              username: '', // keep empty because username is shown above
+              caption: data['comment'] ?? '',
+              isExpanded: isExpanded,
+              onTapReadMore: () {
+                setState(() {
+                  if (_expandedIndexes.contains(index)) {
+                    _expandedIndexes.remove(index);
+                  } else {
+                    _expandedIndexes.add(index);
+                  }
+                });
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

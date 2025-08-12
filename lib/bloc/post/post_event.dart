@@ -10,3 +10,9 @@ class ToggleLikeEvent extends PostEvent {
 
   ToggleLikeEvent({required this.post, required this.currentUserId});
 }
+
+class DeletePostEvent extends PostEvent {
+  final String postId;
+
+  DeletePostEvent({required this.postId});
+}

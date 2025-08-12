@@ -137,7 +137,7 @@ class PostRepository {
         .count()
         .get();
 
-    return likesSnapshot.count ?? 0; // ✅ Provide default value if null
+    return likesSnapshot.count ?? 0;
   }
 
   /// Check if a particular user (or current user if omitted) has liked the post
@@ -151,6 +151,19 @@ class PostRepository {
         .doc(uid)
         .get();
     return doc.exists;
+  }
+
+  // Delete Post
+  Future<void> deletePost(String postId) async {
+    try {
+      final uid = _auth.currentUser?.uid;
+      print('Deleting post: $postId by user: $uid');
+      final doc = await _firestore.collection('posts').doc(postId).get();
+      print('Post ownerId: ${doc.data()?['ownerId']}');
+      await _firestore.collection('posts').doc(postId).delete();
+    } catch (e) {
+      throw Exception("Failed to delete post: $e");
+    }
   }
 
   String? getCurrentUserId() => _auth.currentUser?.uid;
