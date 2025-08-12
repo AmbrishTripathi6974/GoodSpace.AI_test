@@ -33,8 +33,7 @@ class ProfileScreen extends StatelessWidget {
             );
           } else if (state is ProfileLoaded) {
             final user = state.user;
-            final currentUserId =
-                AuthenticationService().getCurrentUser();
+            final currentUserId = AuthenticationService().getCurrentUser();
 
             return DefaultTabController(
               length: 3,
@@ -57,7 +56,10 @@ class ProfileScreen extends StatelessWidget {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.only(
-                                            left: 13, top: 10, bottom: 10, right: 6),
+                                            left: 13,
+                                            top: 10,
+                                            bottom: 10,
+                                            right: 6),
                                         child: ClipOval(
                                           child: SizedBox(
                                             width: 80,
@@ -85,11 +87,16 @@ class ProfileScreen extends StatelessWidget {
                                               Row(
                                                 children: [
                                                   const SizedBox(width: 15),
-                                                  _buildCountWidget(postCount, theme),
+                                                  _buildCountWidget(
+                                                      postCount, theme),
                                                   const SizedBox(width: 70),
-                                                  _buildCountWidget(user.followers.length, theme),
+                                                  _buildCountWidget(
+                                                      user.followers.length,
+                                                      theme),
                                                   const SizedBox(width: 80),
-                                                  _buildCountWidget(user.following.length, theme),
+                                                  _buildCountWidget(
+                                                      user.following.length,
+                                                      theme),
                                                 ],
                                               ),
                                               Row(
@@ -97,9 +104,11 @@ class ProfileScreen extends StatelessWidget {
                                                   const SizedBox(width: 40),
                                                   _buildLabel('Posts', theme),
                                                   const SizedBox(width: 35),
-                                                  _buildLabel('Followers', theme),
+                                                  _buildLabel(
+                                                      'Followers', theme),
                                                   const SizedBox(width: 35),
-                                                  _buildLabel('Following', theme),
+                                                  _buildLabel(
+                                                      'Following', theme),
                                                 ],
                                               ),
                                             ],
@@ -111,13 +120,16 @@ class ProfileScreen extends StatelessWidget {
 
                                   // Name & Bio
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           user.username,
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
                                           ),
@@ -125,7 +137,8 @@ class ProfileScreen extends StatelessWidget {
                                         const SizedBox(height: 5),
                                         Text(
                                           user.bio,
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             fontWeight: FontWeight.w300,
                                             fontSize: 16,
                                           ),
@@ -135,22 +148,25 @@ class ProfileScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 20),
 
-                                  // Show Edit Profile button only if viewing own profile
                                   if (user.uid == currentUserId)
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15),
                                       child: Container(
                                         alignment: Alignment.center,
                                         height: 30,
                                         width: double.infinity,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
-                                          borderRadius: BorderRadius.circular(5),
-                                          border: Border.all(color: Colors.grey.shade400),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                              color: Colors.grey.shade400),
                                         ),
                                         child: Text(
                                           'Edit your profile',
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 16,
                                           ),
@@ -167,8 +183,10 @@ class ProfileScreen extends StatelessWidget {
                                       unselectedLabelColor: Colors.grey,
                                       labelColor: Colors.black,
                                       indicator: UnderlineTabIndicator(
-                                        borderSide: BorderSide(width: 3.0, color: Colors.black),
-                                        insets: EdgeInsets.symmetric(horizontal: 60.0),
+                                        borderSide: BorderSide(
+                                            width: 3.0, color: Colors.black),
+                                        insets: EdgeInsets.symmetric(
+                                            horizontal: 60.0),
                                       ),
                                       tabs: [
                                         Icon(Icons.grid_on),
@@ -241,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildPostsGrid(String uid) {
-    List<QueryDocumentSnapshot>? _cachedPosts;
+    List<QueryDocumentSnapshot>? cachedPosts;
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -251,23 +269,23 @@ class ProfileScreen extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
-            _cachedPosts == null) {
+            cachedPosts == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasData) {
           final docs = snapshot.data!.docs;
           if (docs.isNotEmpty) {
-            _cachedPosts = docs;
+            cachedPosts = docs;
           }
         }
 
-        if ((_cachedPosts == null || _cachedPosts!.isEmpty) &&
+        if ((cachedPosts == null || cachedPosts!.isEmpty) &&
             (!snapshot.hasData || snapshot.data!.docs.isEmpty)) {
           return const Center(child: Text("No posts yet"));
         }
 
-        final posts = _cachedPosts ?? [];
+        final posts = cachedPosts ?? [];
 
         return GridView.builder(
           padding: EdgeInsets.zero,

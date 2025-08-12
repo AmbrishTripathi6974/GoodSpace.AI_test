@@ -51,7 +51,6 @@ class _PostTileState extends State<PostTile> {
   }
 
   Future<void> _onMoreIconTapDown(TapDownDetails details) async {
-    // Only show delete option if current user is the owner
     if (currentUserId == null || currentUserId != widget.post.uid) return;
 
     final dx = details.globalPosition.dx;
@@ -60,7 +59,8 @@ class _PostTileState extends State<PostTile> {
 
     final selected = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(dx, dy, size.width - dx, size.height - dy),
+      position:
+          RelativeRect.fromLTRB(dx, dy, size.width - dx, size.height - dy),
       items: [
         PopupMenuItem<String>(
           value: 'delete',
@@ -74,6 +74,8 @@ class _PostTileState extends State<PostTile> {
         ),
       ],
     );
+
+    if (!mounted) return; 
 
     if (selected == 'delete') {
       final confirmed = await showDialog<bool>(
@@ -94,8 +96,12 @@ class _PostTileState extends State<PostTile> {
         ),
       );
 
+      if (!mounted) return; // <-- check again after await
+
       if (confirmed == true) {
-        context.read<PostBloc>().add(DeletePostEvent(postId: widget.post.postId));
+        context
+            .read<PostBloc>()
+            .add(DeletePostEvent(postId: widget.post.postId));
       }
     }
   }

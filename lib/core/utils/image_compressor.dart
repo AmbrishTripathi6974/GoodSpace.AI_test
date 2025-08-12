@@ -28,7 +28,6 @@ class ImageCompressor {
 
       return result != null ? File(result.path) : null;
     } catch (e) {
-      print("Error compressing image: $e");
       return null;
     }
   }
