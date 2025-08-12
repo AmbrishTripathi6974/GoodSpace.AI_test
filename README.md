@@ -111,36 +111,28 @@ For a complete list, check out the [`pubspec.yaml`](./pubspec.yaml).
 The project follows **clean architecture principles** to ensure scalability and maintainability:
 
 ```
-lib/  
-├── core/               # Core utilities and constants  
-├── data/               # Data sources and models  
-├── features/           # App features grouped by functionality  
-├── presentation/       # UI layers (widgets and screens)  
-└── main.dart           # App entry point  
+lib/
+├── blocs/          # Business logic components (state management)
+├── models/         # Data models representing app entities
+├── repositories/   # Data access layer (API, database abstraction)
+├── services/       # External integrations and core services
+├── screens/        # UI screens/pages of the app
+├── widgets/        # Reusable UI components
+├── utils/          # Helper functions, constants, and utilities
+└── main.dart       # App entry point and initialization
+
 ```  
-
----  
-
-## 🖥️ Screenshots
-
-### Coming Soon
-
----  
-
-## 🌐 Acumensa
-
-This application is an intellectual property of **Acumensa** and is not open-source. Unauthorized duplication, sharing, or modification is prohibited.
-
----  
 
 ### 👥 Contributors
 
-- **Project Owner**: Acumensa Team
-- **Lead Developer**: Arya Pratap Singh | [Working Branch](https://github.com/AcumensaDev/MyWonderApp/tree/latest-release)
+- **Project Owner**: Ambrish Tripathi
+- **Lead Developer**: Ambrish Tripathi | [GitHub Profile](https://github.com/AmbrishTripathi6974)
 
----  
+---
 
-Made with 💙 by **Acumensa**.  
+Made with 💙 by **Ambrish Tripathi**.
+
+
 
 
 
