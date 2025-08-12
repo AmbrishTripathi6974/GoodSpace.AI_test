@@ -53,8 +53,8 @@ Ensure the following are installed on your system:
 
 1. **Clone the Repository**:
    ```bash  
-   git clone https://github.com/acumensa/my-wonder-app.git  
-   cd my-wonder-app  
+   git clone https://github.com/AmbrishTripathi6974/GoodSpace.AI_test.git  
+   cd GoodSpace.AI_test  
    ```  
 
 2. **Install Dependencies**:
@@ -128,6 +128,7 @@ This application is an intellectual property of **Acumensa** and is not open-sou
 ---  
 
 Made with 💙 by **Acumensa**.  
+
 
 
 
